@@ -46,7 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Crc32.cs" />
+    <Compile Include="Difference.cs" />
     <Compile Include="Extensions\Enumerator.cs" />
+    <Compile Include="Extensions\IPAddressExtensions.cs" />
     <Compile Include="Extensions\String.cs" />
     <Compile Include="Extensions\TimeSpan.cs" />
     <Compile Include="Collections\LazyList.cs" />
