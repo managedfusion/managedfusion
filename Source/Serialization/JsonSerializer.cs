@@ -203,11 +203,11 @@ namespace ManagedFusion.Serialization
 			{
 				builder.Append(((bool)value) ? TrueValue : FalseValue);
 			}
-			else if (value is Int16 || value is Int32 || value is Int64)
+			else if (value is Int16 || value is Int32 || value is Int64 || value is Decimal || value is Byte || value is SByte || value is UInt16 || value is UInt32 || value is UInt64)
 			{
 				builder.Append(value);
 			}
-			else if (value is Double || value is Single || value is Decimal)
+			else if (value is Double || value is Single)
 			{
 				builder.AppendFormat("{0:r}", value);
 			}
