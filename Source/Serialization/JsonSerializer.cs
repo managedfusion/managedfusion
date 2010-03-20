@@ -113,7 +113,7 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		public virtual string Serialize(Dictionary<string, object> serialization)
+		public virtual string SerializeToString(Dictionary<string, object> serialization)
 		{
 			StringBuilder builder = new StringBuilder();
 			BuildObject(builder, serialization);

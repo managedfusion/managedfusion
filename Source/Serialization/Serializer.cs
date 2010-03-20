@@ -53,9 +53,9 @@ namespace ManagedFusion.Serialization
 		/// <param name="obj">The obj.</param>
 		/// <param name="serializer">The serializer.</param>
 		/// <returns></returns>
-		public string Serialize(object obj, ISerializer serializer)
+		public string SerializeToString(object obj, ISerializer serializer)
 		{
-			return serializer.Serialize(Serialize(obj, serializer.CheckForObjectName, serializer.MaxSerializableLevelsSupported));
+			return serializer.SerializeToString(SerializeToDictionary(obj, serializer));
 		}
 
 		/// <summary>
@@ -64,11 +64,11 @@ namespace ManagedFusion.Serialization
 		/// <param name="obj">The obj.</param>
 		/// <param name="checkForObjectName">if set to <see langword="true"/> [check for object name].</param>
 		/// <returns></returns>
-		private Dictionary<string, object> Serialize(object obj, bool checkForObjectName, int? maxLevelsToSerialize)
+		public Dictionary<string, object> SerializeToDictionary(object obj, ISerializerOptions options)
 		{
-			object value = SerializeValue(obj, 0 /* level */, maxLevelsToSerialize ?? LevelsToSerialize);
+			object value = SerializeValue(obj, 0 /* level */, options.MaxSerializableLevelsSupported ?? LevelsToSerialize);
 
-			if (checkForObjectName || !(value is Dictionary<string, object>))
+			if (options.CheckForObjectName || !(value is Dictionary<string, object>))
 			{
 				string name = obj is IEnumerable ? "collection" : "object";
 

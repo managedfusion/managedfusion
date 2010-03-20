@@ -40,7 +40,7 @@ namespace ManagedFusion.Serialization
 			get { return 1; }
 		}
 
-		public string Serialize(Dictionary<string, object> serialization)
+		public string SerializeToString(Dictionary<string, object> serialization)
 		{
 			StringBuilder builder = new StringBuilder();
 			BuildHeaderLine(builder, serialization);

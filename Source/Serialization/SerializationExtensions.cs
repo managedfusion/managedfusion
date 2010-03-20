@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Collections.Generic;
 
 namespace ManagedFusion.Serialization
 {
@@ -19,21 +20,7 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public static string Serialize<T>(this T obj, ISerializer serializer)
 		{
-			Serializer ser = new Serializer();
-			return ser.Serialize(obj, serializer);
-		}
-
-		/// <summary>
-		/// Serializes the specified obj.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="obj">The obj.</param>
-		/// <param name="serializer">The serializer.</param>
-		/// <param name="serializePublic">if set to <see langword="true"/> [serialize public].</param>
-		/// <returns></returns>
-		public static string Serialize<T>(this T obj, ISerializer serializer, bool serializePublic)
-		{
-			return Serialize(obj, serializer, serializePublic, serializePublic);
+			return Serialize(obj, serializer, false, false);
 		}
 
 		/// <summary>
@@ -51,7 +38,39 @@ namespace ManagedFusion.Serialization
 				SerializePublicMembers = serializePublic,
 				FollowFrameworkIgnoreAttributes = useFrameworkIgnores
 			};
-			return ser.Serialize(obj, serializer);
+			return ser.SerializeToString(obj, serializer);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static IDictionary<string, object> ToDictionary<T>(this T obj)
+		{
+			return ToDictionary(obj, false, false);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="serializer"></param>
+		/// <param name="serializePublic"></param>
+		/// <param name="useFrameworkIgnores"></param>
+		/// <returns></returns>
+		public static IDictionary<string, object> ToDictionary<T>(this T obj, bool serializePublic, bool useFrameworkIgnores)
+		{
+			Serializer ser = new Serializer() {
+				SerializePublicMembers = serializePublic,
+				FollowFrameworkIgnoreAttributes = useFrameworkIgnores
+			};
+			return ser.SerializeToDictionary(obj, new SerlizerOptions {
+				CheckForObjectName = false,
+				MaxSerializableLevelsSupported = null
+			});
 		}
 
 		/// <summary>
@@ -74,7 +93,7 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public static string ToJson<T>(this T obj, bool serializePublic)
 		{
-			return Serialize<T>(obj, new JsonSerializer(), serializePublic);
+			return Serialize<T>(obj, new JsonSerializer(), serializePublic, serializePublic);
 		}
 
 		/// <summary>
@@ -97,7 +116,7 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public static string ToXml<T>(this T obj, bool serializePublic)
 		{
-			return Serialize<T>(obj, new XmlSerializer(), serializePublic);
+			return Serialize<T>(obj, new XmlSerializer(), serializePublic, serializePublic);
 		}
 	}
 }
