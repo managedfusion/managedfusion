@@ -16,6 +16,8 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		public XmlSerializer()
 		{
+			CheckForObjectName = true;
+			MaxSerializableLevelsSupported = null;
 		}
 
 		/// <summary>
@@ -26,7 +28,8 @@ namespace ManagedFusion.Serialization
 		/// </value>
 		public virtual bool CheckForObjectName
 		{
-			get { return true; }
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -34,7 +37,8 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		public virtual int? MaxSerializableLevelsSupported
 		{
-			get { return null; }
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -148,17 +152,9 @@ namespace ManagedFusion.Serialization
 			{
 				BuildObject(node, value as IDictionary);
 			}
-			else if (value is String)
-			{
-				node.AppendChild(doc.CreateTextNode(value as string));
-			}
 			else if (value is DateTime)
 			{
 				node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((DateTime)value, XmlDateTimeSerializationMode.Utc)));
-			}
-			else if (value is Boolean)
-			{
-				node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((bool)value)));
 			}
 			else if (value is Double || value is Single)
 			{

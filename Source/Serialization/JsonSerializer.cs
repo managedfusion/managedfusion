@@ -87,6 +87,8 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		public JsonSerializer()
 		{
+			CheckForObjectName = false;
+			MaxSerializableLevelsSupported = null;
 		}
 
 		/// <summary>
@@ -97,7 +99,8 @@ namespace ManagedFusion.Serialization
 		/// </value>
 		public virtual bool CheckForObjectName
 		{
-			get { return false; }
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -105,7 +108,8 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		public virtual int? MaxSerializableLevelsSupported
 		{
-			get { return null; }
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -195,9 +199,11 @@ namespace ManagedFusion.Serialization
 			{
 				BuildString(builder, Convert.ToString(value));
 			}
-			else if (value is DateTime)
+			else if (value is DateTime || value is DateTimeOffset)
 			{
-				builder.Append(Math.Floor((((DateTime)value).ToUniversalTime() - UnixTime).TotalMilliseconds));
+				DateTime dt = (value is DateTimeOffset) ? ((DateTimeOffset)value).DateTime : ((DateTime)value);
+
+				builder.Append(Math.Floor((dt.ToUniversalTime() - UnixTime).TotalMilliseconds));
 			}
 			else if (value is Boolean)
 			{

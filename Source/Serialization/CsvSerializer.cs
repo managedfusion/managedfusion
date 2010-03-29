@@ -19,6 +19,9 @@ namespace ManagedFusion.Serialization
 		{
 			SeperatorCharacter = seperatorCharacter;
 			LineTermination = Environment.NewLine;
+
+			CheckForObjectName = false;
+			MaxSerializableLevelsSupported = 1;
 		}
 
 		/// <summary>
@@ -27,17 +30,19 @@ namespace ManagedFusion.Serialization
 		/// <value>
 		/// 	<see langword="true"/> if [check for object name]; otherwise, <see langword="false"/>.
 		/// </value>
-		public bool CheckForObjectName
+		public virtual bool CheckForObjectName
 		{
-			get { return false; }
+			get;
+			set;
 		}
 
 		/// <summary>
 		/// Gets the max levels allowed to be serialized
 		/// </summary>
-		public int? MaxSerializableLevelsSupported
+		public virtual int? MaxSerializableLevelsSupported
 		{
-			get { return 1; }
+			get;
+			set;
 		}
 
 		public string SerializeToString(Dictionary<string, object> serialization)
