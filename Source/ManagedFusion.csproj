@@ -51,7 +51,7 @@
     <Compile Include="Extensions\IPAddressExtensions.cs" />
     <Compile Include="Extensions\String.cs" />
     <Compile Include="Extensions\TimeSpan.cs" />
-    <Compile Include="Collections\LazyList.cs" />
+    <Compile Include="GuidGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\CsvSerializer.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
@@ -65,9 +65,6 @@
     <Compile Include="Serialization\SerlizerOptions.cs" />
     <Compile Include="Serialization\XmlSerializer.cs" />
     <Compile Include="Utility.cs" />
-    <Compile Include="Collections\IPagedList.cs" />
-    <Compile Include="Collections\PagedList.cs" />
-    <Compile Include="Collections\Pagination.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
