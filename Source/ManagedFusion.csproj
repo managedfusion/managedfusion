@@ -50,6 +50,7 @@
     <Compile Include="Extensions\Enumerator.cs" />
     <Compile Include="Extensions\IPAddressExtensions.cs" />
     <Compile Include="Extensions\String.cs" />
+    <Compile Include="Extensions\SubnetMask.cs" />
     <Compile Include="Extensions\TimeSpan.cs" />
     <Compile Include="GuidGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

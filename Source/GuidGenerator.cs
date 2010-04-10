@@ -31,29 +31,35 @@ namespace ManagedFusion
 		public const int VersionByteShift = 4;
 
 		// indexes within the uuid array for certain boundaries
+		private static readonly byte TimestampByte = 0;
 		private static readonly byte GuidClockSequenceByte = 8;
 		private static readonly byte NodeByte = 10;
 
-		// offset to move from 1/1/0000, which is 0-time for .NET, to gregorian 0-time of 10/15/1582
+		// offset to move from 1/1/0001, which is 0-time for .NET, to gregorian 0-time of 10/15/1582
 		private static readonly DateTime GregorianCalendarStart = new DateTime(1582, 10, 15, 0, 0, 0, DateTimeKind.Utc);
 
 		// random node that is 16 bytes
-		private static readonly byte[] Node;
+		private static readonly byte[] RandomNode;
 
 		private static Random _random = new Random();
 
 		static GuidGenerator()
 		{
-			Node = new byte[6];
-			_random.NextBytes(Node);
+			RandomNode = new byte[6];
+			_random.NextBytes(RandomNode);
 		}
 
 		public static Guid GenerateTimeBasedGuid()
 		{
-			return GenerateTimeBasedGuid(DateTime.UtcNow);
+			return GenerateTimeBasedGuid(DateTime.UtcNow, RandomNode);
 		}
 
-		public static Guid GenerateTimeBasedGuid(DateTime dateTime)
+		public static Guid GenerateTimeBased(DateTime dateTime)
+		{
+			return GenerateTimeBasedGuid(dateTime, RandomNode);
+		}
+
+		public static Guid GenerateTimeBasedGuid(DateTime dateTime, byte[] node)
 		{
 			long ticks = dateTime.Ticks - GregorianCalendarStart.Ticks;
 
@@ -62,13 +68,13 @@ namespace ManagedFusion
 			byte[] timestamp = BitConverter.GetBytes(ticks);
 
 			// copy node
-			Array.Copy(Node, 0, guid, NodeByte, Node.Length);
+			Array.Copy(node, 0, guid, NodeByte, node.Length);
 
 			// copy clock sequence
 			Array.Copy(clockSequenceBytes, 0, guid, GuidClockSequenceByte, clockSequenceBytes.Length);
 
 			// copy timestamp
-			Array.Copy(timestamp, 0, guid, 0, timestamp.Length);
+			Array.Copy(timestamp, 0, guid, TimestampByte, timestamp.Length);
 
 			// set the variant
 			guid[VariantByte] &= (byte)VariantByteMask;
