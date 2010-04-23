@@ -38,7 +38,7 @@ namespace ManagedFusion.Serialization
 				SerializePublicMembers = serializePublic,
 				FollowFrameworkIgnoreAttributes = useFrameworkIgnores
 			};
-			return ser.SerializeToString(obj, serializer);
+			return ser.Serialize(obj, serializer);
 		}
 
 		/// <summary>
@@ -67,7 +67,7 @@ namespace ManagedFusion.Serialization
 				SerializePublicMembers = serializePublic,
 				FollowFrameworkIgnoreAttributes = useFrameworkIgnores
 			};
-			return ser.SerializeToDictionary(obj, new SerlizerOptions {
+			return ser.FromObject(obj, new SerlizerOptions {
 				CheckForObjectName = false,
 				MaxSerializableLevelsSupported = null
 			});

@@ -45,7 +45,7 @@ namespace ManagedFusion.Serialization
 			set;
 		}
 
-		public string SerializeToString(Dictionary<string, object> serialization)
+		public string Serialize(IDictionary<string, object> serialization)
 		{
 			StringBuilder builder = new StringBuilder();
 			BuildHeaderLine(builder, serialization);

@@ -46,7 +46,7 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		public virtual string SerializeToString(Dictionary<string, object> serialization)
+		public virtual string Serialize(IDictionary<string, object> serialization)
 		{
 			doc = new XmlDocument();
 
@@ -66,14 +66,11 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		private void BuildObject(XmlNode node, IDictionary serialization)
+		private void BuildObject(XmlNode node, IDictionary<string, object> serialization)
 		{
-			foreach (DictionaryEntry entry in serialization)
+			foreach (var entry in serialization)
 			{
-				if (!(entry.Key is string))
-					throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
-
-				string key = (entry.Key as string).TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker });
+				string key = entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker });
 
 				if ((entry.Key as string).StartsWith(Serializer.AttributeMarker.ToString()))
 				{
@@ -148,9 +145,9 @@ namespace ManagedFusion.Serialization
 			{
 				BuildArray(node, value as IList);
 			}
-			else if (value is IDictionary)
+			else if (value is IDictionary<string, object>)
 			{
-				BuildObject(node, value as IDictionary);
+				BuildObject(node, value as IDictionary<string, object>);
 			}
 			else if (value is DateTime)
 			{

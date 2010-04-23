@@ -15,6 +15,6 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		string SerializeToString(Dictionary<string, object> serialization);
+		string Serialize(IDictionary<string, object> serialization);
 	}
 }

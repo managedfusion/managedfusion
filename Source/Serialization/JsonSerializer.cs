@@ -117,7 +117,7 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		public virtual string SerializeToString(Dictionary<string, object> serialization)
+		public virtual string Serialize(IDictionary<string, object> serialization)
 		{
 			StringBuilder builder = new StringBuilder();
 			BuildObject(builder, serialization);
@@ -129,17 +129,14 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
-		private void BuildObject(StringBuilder builder, IDictionary serialization)
+		private void BuildObject(StringBuilder builder, IDictionary<string, object> serialization)
 		{
 			builder.Append(BeginObject);
 
-			foreach (DictionaryEntry entry in serialization)
+			foreach (var entry in serialization)
 			{
-				if (!(entry.Key is string))
-					throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
-
 				builder.Append(BeginString);
-				builder.Append((entry.Key as string).TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }));
+				builder.Append(entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }));
 				builder.Append(EndString);
 				builder.Append(NameSeperator);
 				BuildValue(builder, entry.Value);
@@ -157,17 +154,19 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="builder">The builder.</param>
 		/// <param name="array">The array.</param>
-		private void BuildArray(StringBuilder builder, IList array)
+		private void BuildArray(StringBuilder builder, IEnumerable array)
 		{
 			builder.Append(BeginArray);
 
-			for (int i = 0; i < array.Count; i++)
+			foreach (var obj in array)
 			{
-				BuildValue(builder, array[i]);
-
-				if (i != array.Count - 1)
-					builder.Append(ValueSeperator);
+				BuildValue(builder, obj);
+				builder.Append(ValueSeperator);
 			}
+
+			// if the array is not empty then remove the last ValueSeperator
+			if (builder[builder.Length - 1] == ValueSeperator)
+				builder.Length--;
 
 			builder.Append(EndArray);
 		}
@@ -183,13 +182,9 @@ namespace ManagedFusion.Serialization
 			{
 				builder.Append(NullValue);
 			}
-			else if (value is IList)
+			else if (value is IDictionary<string,object>)
 			{
-				BuildArray(builder, value as IList);
-			}
-			else if (value is IDictionary)
-			{
-				BuildObject(builder, value as IDictionary);
+				BuildObject(builder, value as IDictionary<string,object>);
 			}
 			else if (value is String)
 			{
@@ -216,6 +211,10 @@ namespace ManagedFusion.Serialization
 			else if (value is Double || value is Single)
 			{
 				builder.AppendFormat("{0:r}", value);
+			}
+			else if (value is IEnumerable)
+			{
+				BuildArray(builder, value as IEnumerable);
 			}
 			else
 			{
