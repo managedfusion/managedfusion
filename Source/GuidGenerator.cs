@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Net.NetworkInformation;
 
-namespace ManagedFusion
+namespace FluentCassandra
 {
 	public static class GuidGenerator
 	{
 		// guid version types
-		private enum GuidVersion
+		private enum GuidVersion : byte
 		{
 			TimeBased = 0x01,
 			Reserved = 0x02,
@@ -54,7 +54,7 @@ namespace ManagedFusion
 			return GenerateTimeBasedGuid(DateTime.UtcNow, RandomNode);
 		}
 
-		public static Guid GenerateTimeBased(DateTime dateTime)
+		public static Guid GenerateTimeBasedGuid(DateTime dateTime)
 		{
 			return GenerateTimeBasedGuid(dateTime, RandomNode);
 		}
@@ -82,7 +82,7 @@ namespace ManagedFusion
 
 			// set the version
 			guid[VersionByte] &= (byte)VersionByteMask;
-			guid[VersionByte] |= (byte)((int)GuidVersion.TimeBased << VersionByteShift);
+			guid[VersionByte] |= (byte)((byte)GuidVersion.TimeBased << VersionByteShift);
 
 			return new Guid(guid);
 		}
