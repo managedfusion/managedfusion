@@ -149,14 +149,23 @@ namespace ManagedFusion.Serialization
 			{
 				BuildObject(node, value as IDictionary<string, object>);
 			}
-			else if (value is DateTime)
-			{
-				node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((DateTime)value, XmlDateTimeSerializationMode.Utc)));
-			}
-			else if (value is Double || value is Single)
-			{
-				node.AppendChild(doc.CreateTextNode(String.Format("{0:r}", value)));
-			}
+			else if (value is bool) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((bool)value))); }
+			else if (value is byte) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((byte)value))); }
+			else if (value is char) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((char)value))); }
+			else if (value is DateTime) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((DateTime)value, XmlDateTimeSerializationMode.RoundtripKind))); }
+			else if (value is DateTimeOffset) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((DateTimeOffset)value))); }
+			else if (value is decimal) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((decimal)value))); }
+			else if (value is double) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((double)value))); }
+			else if (value is float) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((float)value))); }
+			else if (value is Guid) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((Guid)value))); }
+			else if (value is int) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((int)value))); }
+			else if (value is long) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((long)value))); }
+			else if (value is sbyte) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((sbyte)value))); }
+			else if (value is short) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((short)value))); }
+			else if (value is TimeSpan) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((TimeSpan)value))); }
+			else if (value is uint) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((uint)value))); }
+			else if (value is ulong) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ulong)value))); }
+			else if (value is ushort) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ushort)value))); }
 			else
 			{
 				node.AppendChild(doc.CreateTextNode(Convert.ToString(value)));

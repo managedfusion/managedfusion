@@ -196,8 +196,7 @@ namespace ManagedFusion.Serialization
 			}
 			else if (value is DateTime || value is DateTimeOffset)
 			{
-				DateTime dt = (value is DateTimeOffset) ? ((DateTimeOffset)value).DateTime : ((DateTime)value);
-
+				DateTime dt = (value is DateTimeOffset) ? ((DateTimeOffset)value).UtcDateTime : ((DateTime)value);
 				builder.Append(Math.Floor((dt.ToUniversalTime() - UnixTime).TotalMilliseconds));
 			}
 			else if (value is Boolean)
