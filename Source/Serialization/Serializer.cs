@@ -296,7 +296,12 @@ namespace ManagedFusion.Serialization
 				return obj;
 
 			if (obj is IDictionary)
-				return obj;
+			{
+				IDictionary<string, object> list = new Dictionary<string, object>();
+				foreach (DictionaryEntry o in ((IDictionary)obj))
+					list.Add((o.Key ?? "").ToString(), SerializeValue(o.Value, level, levelLimit));
+				return list;
+			}
 
 			if (obj is IEnumerable)
 			{
