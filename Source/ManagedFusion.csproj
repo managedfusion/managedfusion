@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ManagedFusion</RootNamespace>
     <AssemblyName>ManagedFusion</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="Crc32.cs" />
     <Compile Include="Difference.cs" />
+    <Compile Include="Extensions\Dictionary.cs" />
     <Compile Include="Extensions\Enumerator.cs" />
     <Compile Include="Extensions\IPAddress.cs" />
     <Compile Include="Extensions\String.cs" />

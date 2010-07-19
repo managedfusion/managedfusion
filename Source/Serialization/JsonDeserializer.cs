@@ -43,12 +43,12 @@ namespace ManagedFusion.Serialization
 		private static readonly IDictionary<Type, PropertyInfo[]> _cache;
 
 		private static readonly char[] _base16 = new[]
-                             {
-                                 '0', '1', '2', '3', 
-                                 '4', '5', '6', '7', 
-                                 '8', '9', 'A', 'B', 
-                                 'C', 'D', 'E', 'F'
-                             };
+							 {
+								 '0', '1', '2', '3', 
+								 '4', '5', '6', '7', 
+								 '8', '9', 'A', 'B', 
+								 'C', 'D', 'E', 'F'
+							 };
 
 		static JsonDeserializer()
 		{

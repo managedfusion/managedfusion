@@ -85,6 +85,16 @@ namespace ManagedFusion.Serialization
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="json"></param>
+		/// <returns></returns>
+		public static IDictionary<string, object> FromJson(this string json)
+		{
+			return JsonDeserializer.Deserialize(json);
+		}
+
+		/// <summary>
 		/// Toes the json.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
