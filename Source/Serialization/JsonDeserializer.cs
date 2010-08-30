@@ -2,58 +2,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace ManagedFusion.Serialization
 {
-	/// <summary>
-	/// Possible JSON tokens in parsed input.
-	/// </summary>
-	public enum JsonToken
-	{
-		Unknown,
-		LeftBrace,
-		RightBrace,
-		Colon,
-		Comma,
-		LeftBracket,
-		RightBracket,
-		String,
-		Number,
-		True,
-		False,
-		Null
-	}
-
-	/// <summary>
-	/// Exception raised when <see cref="JsonParser" /> encounters an invalid token.
-	/// </summary>
-	public class InvalidJsonException : Exception
-	{
-		public InvalidJsonException(string message)
-			: base(message) { }
-	}
-
 	/// <seealso cref="http://json.org" />
 	/// <seealso href="http://dimebrain.com/2010/04/how-to-parse-json.html"/>
 	public class JsonDeserializer
 	{
 		private const NumberStyles JsonNumbers = NumberStyles.Float;
-		private static readonly IDictionary<Type, PropertyInfo[]> _cache;
-
-		private static readonly char[] _base16 = new[]
-							 {
-								 '0', '1', '2', '3', 
-								 '4', '5', '6', '7', 
-								 '8', '9', 'A', 'B', 
-								 'C', 'D', 'E', 'F'
-							 };
-
-		static JsonDeserializer()
-		{
-			_cache = new Dictionary<Type, PropertyInfo[]>(0);
-		}
 
 		public static IDictionary<string, object> Deserialize(string json)
 		{
@@ -70,37 +27,142 @@ namespace ManagedFusion.Serialization
 				);
 		}
 
-		internal static KeyValuePair<string, object> ParsePair(IList<char> data, ref int index)
+		internal static IDictionary<string, object> ParseMembers(IList<char> data, ref int index)
 		{
-			var valid = true;
+			var result = InitializeBag();
 
-			var name = ParseString(data, ref index);
-			if (name == null)
+			while (index < data.Count)
 			{
-				valid = false;
+				var token = NextToken(data, ref index);
+				switch (token)
+				{
+					case JsonToken.String:
+						var pair = ParsePair(data, ref index);
+						result.Add(pair.Key, pair.Value);
+						break;
+
+					case JsonToken.Comma:
+						index++;
+						break;
+
+					case JsonToken.RightBrace:	// End Object
+						return result;
+
+					default:
+						throw new InvalidJsonException(string.Format(
+							"Invalid JSON found while parsing an object at index {0}.", index
+							), data, index);
+				}
 			}
 
-			if (!ParseToken(JsonToken.Colon, data, ref index))
-			{
-				valid = false;
-			}
-
-			if (!valid)
-			{
-				throw new InvalidJsonException(string.Format(
-							"Invalid JSON found while parsing a value pair at index {0}.", index
-							));
-			}
-
-			index++;
-			var value = ParseValue(data, ref index);
-			return new KeyValuePair<string, object>(name, value);
+			throw new InvalidJsonException(String.Format(
+				"Invalid JSON found while parsing an array at index {0}.", index
+				), data, index);
 		}
 
-		internal static bool ParseToken(JsonToken token, IList<char> data, ref int index)
+		internal static IDictionary<string, object> ParseObject(IList<char> data, ref int index)
 		{
-			var nextToken = NextToken(data, ref index);
-			return token == nextToken;
+			IDictionary<string, object> result = new Dictionary<string, object>();
+
+			index++; // Skip first brace
+			while (index < data.Count)
+			{
+				var token = NextToken(data, ref index);
+				switch (token)
+				{
+					case JsonToken.RightBrace:
+						index++;
+						return result;
+
+					case JsonToken.String:
+						result = ParseMembers(data, ref index);
+						break;
+
+					default:
+						throw new InvalidJsonException(string.Format(
+							"Invalid JSON found while parsing an object at index {0}.", index
+							), data, index);
+				}
+			}
+
+			throw new InvalidJsonException(String.Format(
+				"Invalid JSON found while parsing an array at index {0}.", index
+				), data, index);
+		}
+
+		internal static IEnumerable<object> ParseElements(IList<char> data, ref int index)
+		{
+			var result = new List<object>();
+
+			while (index < data.Count)
+			{
+				var token = NextToken(data, ref index);
+				switch (token)
+				{
+					case JsonToken.LeftBrace:           // Start Object
+					case JsonToken.LeftBracket:         // Start Array
+					case JsonToken.String:
+					case JsonToken.Number:
+					case JsonToken.True:
+					case JsonToken.False:
+					case JsonToken.Null:
+						var value = ParseValue(data, ref index);
+						result.Add(value);
+						break;
+
+					case JsonToken.Comma:
+						index++;
+						break;
+
+					case JsonToken.RightBracket:
+						return result;
+
+					default:
+						throw new InvalidJsonException(string.Format(
+							"Invalid JSON found while parsing an object at index {0}.", index
+							), data, index);
+				}
+			}
+
+			throw new InvalidJsonException(String.Format(
+				"Invalid JSON found while parsing an array at index {0}.", index
+				), data, index);
+		}
+
+		internal static IEnumerable<object> ParseArray(IList<char> data, ref int index)
+		{
+			IEnumerable<object> result = new List<object>();
+
+			index++; // Skip first bracket
+			while (index < data.Count)
+			{
+				var token = NextToken(data, ref index);
+				switch (token)
+				{					
+					case JsonToken.RightBracket:        // End Array
+						index++;
+						return result;
+
+					case JsonToken.LeftBrace:           // Start Object
+					case JsonToken.LeftBracket:         // Start Array
+					case JsonToken.String:
+					case JsonToken.Number:
+					case JsonToken.True:
+					case JsonToken.False:
+					case JsonToken.Null:
+						result = ParseElements(data, ref index);
+						break;
+
+					default:
+						throw new InvalidJsonException(String.Format(
+							"Invalid JSON found while parsing an array at index {0}.", index
+							), data, index);
+				}
+			}
+
+			throw new InvalidJsonException(String.Format(
+				"Invalid JSON found while parsing an array at index {0}.", index
+				), data, index);
 		}
 
 		internal static string ParseString(IList<char> data, ref int index)
@@ -164,136 +226,6 @@ namespace ManagedFusion.Serialization
 			}
 		}
 
-		internal static object ParseValue(IList<char> data, ref int index)
-		{
-			var token = NextToken(data, ref index);
-			switch (token)
-			{
-				// End Tokens
-				case JsonToken.RightBracket:    // Bad Data
-				case JsonToken.RightBrace:
-				case JsonToken.Unknown:
-				case JsonToken.Colon:
-				case JsonToken.Comma:
-					throw new InvalidJsonException(string.Format(
-							"Invalid JSON found while parsing a value at index {0}.", index
-							));
-				// Value Tokens
-				case JsonToken.LeftBrace:
-					return ParseObject(data, ref index);
-				case JsonToken.LeftBracket:
-					return ParseArray(data, ref index);
-				case JsonToken.String:
-					return ParseString(data, ref index);
-				case JsonToken.Number:
-					return ParseNumber(data, ref index);
-				case JsonToken.True:
-					return true;
-				case JsonToken.False:
-					return false;
-				case JsonToken.Null:
-					return null;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-		internal static IDictionary<string, object> ParseObject(IList<char> data, ref int index)
-		{
-			var result = InitializeBag();
-
-			index++; // Skip first brace
-			while (index < data.Count - 1)
-			{
-				var token = NextToken(data, ref index);
-				switch (token)
-				{
-					// End Tokens
-					case JsonToken.Unknown:             // Bad Data
-					case JsonToken.True:
-					case JsonToken.False:
-					case JsonToken.Null:
-					case JsonToken.Comma:
-					case JsonToken.Colon:
-					case JsonToken.RightBracket:
-					case JsonToken.Number:
-						throw new InvalidJsonException(string.Format(
-							"Invalid JSON found while parsing an object at index {0}.", index
-							));
-					case JsonToken.RightBrace:          // End Object
-						return result;
-					// Start Tokens
-					case JsonToken.LeftBrace:           // Start Object
-						var @object = ParseObject(data, ref index);
-						if (@object != null)
-						{
-							result.Add("object", @object);
-						}
-						break;
-					case JsonToken.LeftBracket:         // Start Array
-						var @array = ParseArray(data, ref index);
-						if (@array != null)
-						{
-							result.Add("array", @array);
-						}
-						break;
-					case JsonToken.String:
-						var pair = ParsePair(data, ref index);
-						result.Add(pair.Key, pair.Value);
-						break;
-					default:
-						throw new NotSupportedException("Invalid token expected.");
-				}
-
-				index++;
-			}
-
-			return result;
-		}
-
-		internal static IEnumerable<object> ParseArray(IList<char> data, ref int index)
-		{
-			var result = new List<object>();
-
-			index++; // Skip first bracket
-			while (index < data.Count - 1)
-			{
-				var token = NextToken(data, ref index);
-				switch (token)
-				{
-					// End Tokens
-					case JsonToken.Unknown:             // Bad Data
-						throw new InvalidJsonException(string.Format(
-							"Invalid JSON found while parsing an array at index {0}.", index
-							));
-					case JsonToken.RightBracket:        // End Array
-						return result;
-					// Skip Tokens
-					case JsonToken.Comma:               // Separator
-					case JsonToken.RightBrace:          // End Object
-					case JsonToken.Colon:               // Separator
-						break;
-					// Value Tokens
-					case JsonToken.LeftBrace:           // Start Object
-					case JsonToken.LeftBracket:         // Start Array
-					case JsonToken.String:
-					case JsonToken.Number:
-					case JsonToken.True:
-					case JsonToken.False:
-					case JsonToken.Null:
-						var value = ParseValue(data, ref index);
-						result.Add(value);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-
-				index++;
-			}
-
-			return result;
-		}
-
 		internal static object ParseNumber(IList<char> data, ref int index)
 		{
 			var symbol = data[index];
@@ -311,16 +243,70 @@ namespace ManagedFusion.Serialization
 			Array.Copy(data.ToArray(), start, number, 0, length);
 
 			double result;
-			var buffer = new string(number);
+			var buffer = new String(number);
 
-			if (!double.TryParse(buffer, JsonNumbers, CultureInfo.InvariantCulture, out result))
-			{
+			if (!Double.TryParse(buffer, JsonNumbers, CultureInfo.InvariantCulture, out result))
 				throw new InvalidJsonException(
-					string.Format("Value '{0}' was not a valid JSON number", buffer)
+					String.Format("Value '{0}' was not a valid JSON number", buffer), data, index
 					);
-			}
 
 			return result;
+		}
+
+		internal static KeyValuePair<string, object> ParsePair(IList<char> data, ref int index)
+		{
+			var valid = true;
+
+			var name = ParseString(data, ref index);
+			if (name == null)
+				valid = false;
+
+			if (!ParseToken(JsonToken.Colon, data, ref index))
+				valid = false;
+
+			index++;
+			if (!valid)
+				throw new InvalidJsonException(String.Format(
+							"Invalid JSON found while parsing a value pair at index {0}.", index
+							), data, index);
+
+			var value = ParseValue(data, ref index);
+			//index++;
+
+			return new KeyValuePair<string, object>(name, value);
+		}
+
+		internal static object ParseValue(IList<char> data, ref int index)
+		{
+			var token = NextToken(data, ref index);
+			switch (token)
+			{
+				case JsonToken.String:
+					return ParseString(data, ref index);
+				case JsonToken.Number:
+					return ParseNumber(data, ref index);
+				case JsonToken.LeftBrace:
+					return ParseObject(data, ref index);
+				case JsonToken.LeftBracket:
+					return ParseArray(data, ref index);
+				case JsonToken.True:
+					return true;
+				case JsonToken.False:
+					return false;
+				case JsonToken.Null:
+					return null;
+
+				default:
+					throw new InvalidJsonException(string.Format(
+							"Invalid JSON found while parsing a value at index {0}.", index
+							), data, index);
+			}
+		}
+
+		internal static bool ParseToken(JsonToken token, IList<char> data, ref int index)
+		{
+			var nextToken = NextToken(data, ref index);
+			return token == nextToken;
 		}
 
 		internal static JsonToken NextToken(IList<char> data, ref int index)
