@@ -8,28 +8,25 @@ namespace ManagedFusion.Serialization
 {
 	/// <seealso cref="http://json.org" />
 	/// <seealso href="http://dimebrain.com/2010/04/how-to-parse-json.html"/>
-	public class JsonDeserializer
+	public class JsonDeserializer : IDeserializer
 	{
-		private const NumberStyles JsonNumbers = NumberStyles.Float;
+		private const NumberStyles JsonNumberStyle = NumberStyles.Float;
 
-		public static IDictionary<string, object> Deserialize(string json)
+		#region IDeserializer Members
+
+		public IDictionary<string, object> Deserialize(string input)
 		{
-			var data = json.ToCharArray();
+			var data = input.ToCharArray();
 			var index = 0;
 
 			return ParseObject(data, ref index);
 		}
 
-		internal static Dictionary<string, object> InitializeBag()
-		{
-			return new Dictionary<string, object>(
-				0, StringComparer.OrdinalIgnoreCase
-				);
-		}
+		#endregion
 
-		internal static IDictionary<string, object> ParseMembers(IList<char> data, ref int index)
+		private IDictionary<string, object> ParseMembers(IList<char> data, ref int index)
 		{
-			var result = InitializeBag();
+			var result = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
 			while (index < data.Count)
 			{
@@ -60,7 +57,7 @@ namespace ManagedFusion.Serialization
 				), data, index);
 		}
 
-		internal static IDictionary<string, object> ParseObject(IList<char> data, ref int index)
+		private IDictionary<string, object> ParseObject(IList<char> data, ref int index)
 		{
 			IDictionary<string, object> result = new Dictionary<string, object>();
 
@@ -90,7 +87,7 @@ namespace ManagedFusion.Serialization
 				), data, index);
 		}
 
-		internal static IEnumerable<object> ParseElements(IList<char> data, ref int index)
+		private IEnumerable<object> ParseElements(IList<char> data, ref int index)
 		{
 			var result = new List<object>();
 
@@ -129,7 +126,7 @@ namespace ManagedFusion.Serialization
 				), data, index);
 		}
 
-		internal static IEnumerable<object> ParseArray(IList<char> data, ref int index)
+		private IEnumerable<object> ParseArray(IList<char> data, ref int index)
 		{
 			IEnumerable<object> result = new List<object>();
 
@@ -138,7 +135,7 @@ namespace ManagedFusion.Serialization
 			{
 				var token = NextToken(data, ref index);
 				switch (token)
-				{					
+				{
 					case JsonToken.RightBracket:        // End Array
 						index++;
 						return result;
@@ -165,7 +162,7 @@ namespace ManagedFusion.Serialization
 				), data, index);
 		}
 
-		internal static string ParseString(IList<char> data, ref int index)
+		private string ParseString(IList<char> data, ref int index)
 		{
 			var symbol = data[index];
 			IgnoreWhitespace(data, ref index, symbol);
@@ -226,7 +223,7 @@ namespace ManagedFusion.Serialization
 			}
 		}
 
-		internal static object ParseNumber(IList<char> data, ref int index)
+		private object ParseNumber(IList<char> data, ref int index)
 		{
 			var symbol = data[index];
 			IgnoreWhitespace(data, ref index, symbol);
@@ -242,10 +239,10 @@ namespace ManagedFusion.Serialization
 			var number = new char[length];
 			Array.Copy(data.ToArray(), start, number, 0, length);
 
-			double result;
+			decimal result;
 			var buffer = new String(number);
 
-			if (!Double.TryParse(buffer, JsonNumbers, CultureInfo.InvariantCulture, out result))
+			if (!Decimal.TryParse(buffer, JsonNumberStyle, CultureInfo.InvariantCulture, out result))
 				throw new InvalidJsonException(
 					String.Format("Value '{0}' was not a valid JSON number", buffer), data, index
 					);
@@ -253,7 +250,7 @@ namespace ManagedFusion.Serialization
 			return result;
 		}
 
-		internal static KeyValuePair<string, object> ParsePair(IList<char> data, ref int index)
+		private KeyValuePair<string, object> ParsePair(IList<char> data, ref int index)
 		{
 			var valid = true;
 
@@ -276,7 +273,7 @@ namespace ManagedFusion.Serialization
 			return new KeyValuePair<string, object>(name, value);
 		}
 
-		internal static object ParseValue(IList<char> data, ref int index)
+		private object ParseValue(IList<char> data, ref int index)
 		{
 			var token = NextToken(data, ref index);
 			switch (token)
@@ -303,13 +300,13 @@ namespace ManagedFusion.Serialization
 			}
 		}
 
-		internal static bool ParseToken(JsonToken token, IList<char> data, ref int index)
+		private bool ParseToken(JsonToken token, IList<char> data, ref int index)
 		{
 			var nextToken = NextToken(data, ref index);
 			return token == nextToken;
 		}
 
-		internal static JsonToken NextToken(IList<char> data, ref int index)
+		private JsonToken NextToken(IList<char> data, ref int index)
 		{
 			var symbol = data[index];
 			var token = GetTokenFromSymbol(symbol);
@@ -322,12 +319,12 @@ namespace ManagedFusion.Serialization
 			return token;
 		}
 
-		internal static JsonToken GetTokenFromSymbol(char symbol)
+		private JsonToken GetTokenFromSymbol(char symbol)
 		{
 			return GetTokenFromSymbol(symbol, JsonToken.Unknown);
 		}
 
-		internal static JsonToken GetTokenFromSymbol(char symbol, JsonToken token)
+		private JsonToken GetTokenFromSymbol(char symbol, JsonToken token)
 		{
 			switch (symbol)
 			{
@@ -373,14 +370,14 @@ namespace ManagedFusion.Serialization
 			return token;
 		}
 
-		internal static void IgnoreWhitespace(IList<char> data, ref int index, char symbol)
+		private void IgnoreWhitespace(IList<char> data, ref int index, char symbol)
 		{
 			var token = JsonToken.Unknown;
 			IgnoreWhitespace(data, ref index, ref token, symbol);
 			return;
 		}
 
-		internal static JsonToken IgnoreWhitespace(IList<char> data, ref int index, ref JsonToken token, char symbol)
+		private JsonToken IgnoreWhitespace(IList<char> data, ref int index, ref JsonToken token, char symbol)
 		{
 			switch (symbol)
 			{
@@ -399,7 +396,7 @@ namespace ManagedFusion.Serialization
 			return token;
 		}
 
-		internal static void GetKeyword(string word, JsonToken target, IList<char> data, ref int index, ref JsonToken result)
+		private void GetKeyword(string word, JsonToken target, IList<char> data, ref int index, ref JsonToken result)
 		{
 			var buffer = data.Count - index;
 			if (buffer < word.Length)
@@ -417,26 +414,6 @@ namespace ManagedFusion.Serialization
 
 			result = target;
 			index += word.Length;
-		}
-
-		internal static string BaseConvert(int input, char[] charSet, int minLength)
-		{
-			var sb = new StringBuilder();
-			var @base = charSet.Length;
-
-			while (input > 0)
-			{
-				var index = input % @base;
-				sb.Insert(0, new[] { charSet[index] });
-				input = input / @base;
-			}
-
-			while (sb.Length < minLength)
-			{
-				sb.Insert(0, "0");
-			}
-
-			return sb.ToString();
 		}
 	}
 }

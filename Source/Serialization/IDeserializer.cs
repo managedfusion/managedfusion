@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ManagedFusion.Serialization
 {
-	public interface IDeserializer : ISerializerOptions
+	public interface IDeserializer : IDeserializerOptions
 	{
 		/// <summary>
 		/// 

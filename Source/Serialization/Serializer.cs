@@ -122,8 +122,11 @@ namespace ManagedFusion.Serialization
 		/// <param name="input"></param>
 		/// <param name="options"></param>
 		/// <returns></returns>
-		public static T ToObject<T>(IDictionary<string, object> input, ISerializerOptions options)
+		public T ToObject<T>(IDictionary<string, object> input, IDeserializerOptions options)
 		{
+			if (typeof(T) == typeof(IDictionary<string, object>))
+				return (T)input;
+
 			T instance;
 			var map = PrepareInstance(out instance);
 
@@ -165,7 +168,7 @@ namespace ManagedFusion.Serialization
 		/// <typeparam name="T"></typeparam>
 		/// <param name="instance"></param>
 		/// <returns></returns>
-		internal static IEnumerable<PropertyInfo> PrepareInstance<T>(out T instance)
+		internal IEnumerable<PropertyInfo> PrepareInstance<T>(out T instance)
 		{
 			instance = Activator.CreateInstance<T>();
 			var item = typeof(T);
@@ -179,7 +182,7 @@ namespace ManagedFusion.Serialization
 		/// 
 		/// </summary>
 		/// <param name="item"></param>
-		internal static void CacheReflection(Type item)
+		internal void CacheReflection(Type item)
 		{
 			if (_cache.ContainsKey(item))
 			{

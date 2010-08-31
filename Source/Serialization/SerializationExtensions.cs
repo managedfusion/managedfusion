@@ -44,6 +44,18 @@ namespace ManagedFusion.Serialization
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="deserializer"></param>
+		/// <returns></returns>
+		public static T Deserialize<T>(string input, IDeserializer deserializer)
+		{
+			Serializer ser = new Serializer();
+			return ser.Deserialize<T>(input, deserializer);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="obj"></param>
 		/// <returns></returns>
@@ -91,7 +103,7 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public static IDictionary<string, object> FromJson(this string json)
 		{
-			return JsonDeserializer.Deserialize(json);
+			return Deserialize<IDictionary<string, object>>(json, new JsonDeserializer());
 		}
 
 		/// <summary>
