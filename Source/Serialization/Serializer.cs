@@ -298,6 +298,9 @@ namespace ManagedFusion.Serialization
 			if (obj is DateTimeOffset)
 				return obj;
 
+			if (obj is IDictionary<string, object>)
+				return (IDictionary<string, object>)obj;
+
 			if (obj is IDictionary)
 			{
 				IDictionary<string, object> list = new Dictionary<string, object>();

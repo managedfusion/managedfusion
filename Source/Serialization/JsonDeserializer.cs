@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Web.Script.Serialization;
 
 namespace ManagedFusion.Serialization
 {
@@ -16,10 +17,13 @@ namespace ManagedFusion.Serialization
 
 		public IDictionary<string, object> Deserialize(string input)
 		{
-			var data = input.ToCharArray();
-			var index = 0;
+			JavaScriptSerializer serializer = new JavaScriptSerializer();
+			return serializer.Deserialize<Dictionary<string, object>>(input);
 
-			return ParseObject(data, ref index);
+			//var data = input.ToCharArray();
+			//var index = 0;
+
+			//return ParseObject(data, ref index);
 		}
 
 		#endregion
@@ -346,6 +350,7 @@ namespace ManagedFusion.Serialization
 				case ']':
 					token = JsonToken.RightBracket;
 					break;
+				case '\'':
 				case '"':
 					token = JsonToken.String;
 					break;
