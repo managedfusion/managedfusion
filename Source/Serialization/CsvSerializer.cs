@@ -9,8 +9,9 @@ namespace ManagedFusion.Serialization
 	public class CsvSerializer : ISerializer
 	{
 		private readonly char SeperatorCharacter;
-
 		private readonly string LineTermination;
+		private readonly string FieldDefinition = "\"";
+		private readonly string FieldDefinitionEscape = "\"\"";
 
 		public CsvSerializer()
 			: this(',') { }
@@ -75,7 +76,8 @@ namespace ManagedFusion.Serialization
 					if (!(entry.Key is string))
 						throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
 
-					values.Add((entry.Key ?? "").ToString());
+					var key = (entry.Key ?? "").ToString().Replace(FieldDefinition, FieldDefinitionEscape);
+					values.Add(FieldDefinition + key + FieldDefinition);
 				}
 				builder.Append(String.Join(SeperatorCharacter.ToString(), values.ToArray()));
 				builder.Append(LineTermination);
@@ -105,7 +107,8 @@ namespace ManagedFusion.Serialization
 						if (!(entry.Key is string))
 							throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
 
-						values.Add((entry.Value ?? "").ToString());
+						var value = (entry.Value ?? "").ToString().Replace(FieldDefinition, FieldDefinitionEscape);
+						values.Add(FieldDefinition + value + FieldDefinition);
 					}
 					builder.Append(String.Join(SeperatorCharacter.ToString(), values.ToArray()));
 					builder.Append(LineTermination);
