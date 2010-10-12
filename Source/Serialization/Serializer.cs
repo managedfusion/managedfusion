@@ -87,7 +87,7 @@ namespace ManagedFusion.Serialization
 
 			if (options.CheckForObjectName || !(value is IDictionary<string, object>))
 			{
-				string name = obj is IEnumerable ? "collection" : "object";
+				string name = obj is ICollection ? "collection" : "object";
 
 				// make sure the object isn't an easily handled primity type with IEnumerable
 				if (Type.GetTypeCode(obj.GetType()) != TypeCode.Object)
@@ -101,7 +101,6 @@ namespace ManagedFusion.Serialization
 					if (attrs.Length > 0)
 					{
 						SerializableObjectAttribute attr = attrs[0] as SerializableObjectAttribute;
-
 						name = attr.Name;
 					}
 				}
@@ -309,7 +308,7 @@ namespace ManagedFusion.Serialization
 				return list;
 			}
 
-			if (obj is IEnumerable)
+			if (obj is ICollection)
 			{
 				object[] attrs = objectType.GetCustomAttributes(typeof(SerializableCollectionObjectAttribute), true);
 				string collectionItemName = null;
@@ -321,28 +320,19 @@ namespace ManagedFusion.Serialization
 				}
 
 				IList<object> list = new List<object>();
-				IEnumerable collection = (IEnumerable)obj;
+				ICollection collection = (ICollection)obj;
 
 				if (attrs.Length == 0)
 				{
 					foreach (object o in collection)
-					{
-						if (Type.GetTypeCode(o.GetType()) != TypeCode.Object)
-							list.Add(o);
-						else
-							list.Add(SerializeValue(o, level, levelLimit));
-					}
+						list.Add(SerializeValue(o, level, levelLimit));
 				}
 				else
 				{
 					foreach (object o in collection)
 					{
 						IDictionary<string, object> list2 = new Dictionary<string, object>();
-
-						if (Type.GetTypeCode(o.GetType()) != TypeCode.Object)
-							list2.Add(collectionItemName, o);
-						else
-							list2.Add(collectionItemName, SerializeValue(o, level, levelLimit));
+						list2.Add(collectionItemName, SerializeValue(o, level, levelLimit));
 
 						list.Add(list2);
 					}
