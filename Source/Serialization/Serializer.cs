@@ -93,6 +93,10 @@ namespace ManagedFusion.Serialization
 				if (Type.GetTypeCode(obj.GetType()) != TypeCode.Object)
 					name = "object";
 
+				// make sure this type of dictionary is treated as an object
+				if (obj is IDictionary<string, object>)
+					name = "object";
+
 				// get what the object likes to be called
 				if (obj.GetType().IsDefined(typeof(SerializableObjectAttribute), true))
 				{
@@ -266,7 +270,6 @@ namespace ManagedFusion.Serialization
 				if (attrs.Length > 0)
 				{
 					SerializablePropertyAttribute attr = attrs[0] as SerializablePropertyAttribute;
-
 					name = (attr.IsAttribute ? AttributeMarker.ToString() : String.Empty) + attr.Name;
 				}
 			}
@@ -298,7 +301,12 @@ namespace ManagedFusion.Serialization
 				return obj;
 
 			if (obj is IDictionary<string, object>)
-				return (IDictionary<string, object>)obj;
+			{
+				IDictionary<string, object> list = new Dictionary<string, object>();
+				foreach (var o in ((IDictionary<string, object>)obj))
+					list.Add((o.Key ?? "").ToString(), SerializeValue(o.Value, level, levelLimit));
+				return list;
+			}
 
 			if (obj is IDictionary)
 			{
@@ -308,7 +316,7 @@ namespace ManagedFusion.Serialization
 				return list;
 			}
 
-			if (obj is ICollection)
+			if (obj is IEnumerable)
 			{
 				object[] attrs = objectType.GetCustomAttributes(typeof(SerializableCollectionObjectAttribute), true);
 				string collectionItemName = null;
@@ -320,7 +328,7 @@ namespace ManagedFusion.Serialization
 				}
 
 				IList<object> list = new List<object>();
-				ICollection collection = (ICollection)obj;
+				IEnumerable collection = (IEnumerable)obj;
 
 				if (attrs.Length == 0)
 				{
