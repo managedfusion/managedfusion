@@ -99,6 +99,7 @@
     <Compile Include="Serialization\Serializer.cs" />
     <Compile Include="Serialization\SerlizerOptions.cs" />
     <Compile Include="Serialization\XmlSerializer.cs" />
+    <Compile Include="TimedLock.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
