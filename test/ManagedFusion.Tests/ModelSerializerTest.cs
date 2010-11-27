@@ -8,25 +8,23 @@ using System.Linq;
 namespace ManagedFusion.Tests
 {
 	[TestFixture]
-	public class SerializerTest
+	public class ModelSerializerTest
 	{
-		[Test]
-		public void Simple()
+		private class TestModel : IModelSerializer
 		{
-			// arrange
-			var expected = "test";
-			var obj = new Dictionary<string, object>() { 
-				{ "name", expected }
-			};
+			#region IModelSerializer Members
 
-			var ser = new Serializer();
-			var options = new SerlizerOptions();
-			
-			// act
-			var result = ser.FromObject(obj, options);
+			IDictionary<string, object> IModelSerializer.GetSerializedModel()
+			{
+				dynamic model = new ExpandoObject();
 
-			// assert
-			Assert.AreEqual(expected, result["name"]);
+				((IDictionary<string, object>)model).Add(Serializer.ModelNameKey, "test");
+				model.name = "value";
+
+				return model;
+			}
+
+			#endregion
 		}
 
 		[Test]
@@ -34,14 +32,11 @@ namespace ManagedFusion.Tests
 		{
 			// arrange
 			var expected = "test";
-			var obj = new Dictionary<string, object>() { 
-				{ Serializer.ModelNameKey, expected },
-				{ "name", "value" }
-			};
+			var obj = new TestModel();
 
 			var ser = new Serializer();
 			var options = new SerlizerOptions { CheckForObjectName = true };
-			
+
 			// act
 			var result = ser.FromObject(obj, options);
 
