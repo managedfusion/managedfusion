@@ -22,13 +22,10 @@ namespace ManagedFusion.Serialization
 		public const char CollectionItemMarker = '+';
 
 		private static readonly IDictionary<Type, PropertyInfo[]> _cache;
+		public const string ModelNameKey = "{{MODEL_NAME}}";
 
 		public static string GetSerializedObjectName(object obj)
 		{
-			// check for special case name from dictionary object
-			if (obj is IDictionary<string, object> && ((IDictionary<string, object>)obj).ContainsKey("{{MODEL_NAME}}"))
-				return Convert.ToString(((IDictionary<string, object>)obj)["{{MODEL_NAME}}"]);
-
 			string name = obj is ICollection ? "collection" : "object";
 
 			// make sure the object isn't an easily handled primity type with IEnumerable
@@ -38,6 +35,10 @@ namespace ManagedFusion.Serialization
 			// make sure this type of dictionary is treated as an object
 			if (obj is IDictionary<string, object>)
 				name = "object";
+
+			// check for special case name from dictionary object
+			if (obj is IDictionary<string, object> && ((IDictionary<string, object>)obj).ContainsKey(ModelNameKey))
+				name = Convert.ToString(((IDictionary<string, object>)obj)[ModelNameKey]);
 
 			// get what the object likes to be called
 			if (obj.GetType().IsDefined(typeof(SerializableObjectAttribute), true))
@@ -115,6 +116,10 @@ namespace ManagedFusion.Serialization
 		public IDictionary<string, object> FromObject(object obj, ISerializerOptions options)
 		{
 			object value = SerializeValue(obj, 0 /* level */, options.MaxSerializableLevelsSupported ?? LevelsToSerialize);
+
+			// remove special case model name if found in output
+			if (value is IDictionary<string, object> && ((IDictionary<string, object>)value).ContainsKey(ModelNameKey))
+				((IDictionary<string, object>)value).Remove(ModelNameKey);
 
 			if (options.CheckForObjectName || !(value is IDictionary<string, object>))
 			{
