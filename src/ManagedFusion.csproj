@@ -87,6 +87,7 @@
     <Compile Include="Serialization\IDeserializer.cs" />
     <Compile Include="Serialization\IDeserializerOptions.cs" />
     <Compile Include="Serialization\InvalidJsonException.cs" />
+    <Compile Include="Serialization\IModelSerializer.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\ISerializerOptions.cs" />
     <Compile Include="Serialization\JsonDeserializer.cs" />

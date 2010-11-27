@@ -300,6 +300,9 @@ namespace ManagedFusion.Serialization
 			if (obj is DateTimeOffset)
 				return obj;
 
+			if (obj is IModelSerializer)
+				return ((IModelSerializer)obj).GetSerializedModel();
+
 			if (obj is IDictionary<string, object>)
 			{
 				IDictionary<string, object> list = new Dictionary<string, object>();
