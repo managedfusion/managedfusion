@@ -23,6 +23,37 @@ namespace ManagedFusion.Serialization
 
 		private static readonly IDictionary<Type, PropertyInfo[]> _cache;
 
+		public static string GetSerializedObjectName(object obj)
+		{
+			// check for special case name from dictionary object
+			if (obj is IDictionary<string, object> && ((IDictionary<string, object>)obj).ContainsKey("{{MODEL_NAME}}"))
+				return Convert.ToString(((IDictionary<string, object>)obj)["{{MODEL_NAME}}"]);
+
+			string name = obj is ICollection ? "collection" : "object";
+
+			// make sure the object isn't an easily handled primity type with IEnumerable
+			if (Type.GetTypeCode(obj.GetType()) != TypeCode.Object)
+				name = "object";
+
+			// make sure this type of dictionary is treated as an object
+			if (obj is IDictionary<string, object>)
+				name = "object";
+
+			// get what the object likes to be called
+			if (obj.GetType().IsDefined(typeof(SerializableObjectAttribute), true))
+			{
+				object[] attrs = obj.GetType().GetCustomAttributes(typeof(SerializableObjectAttribute), true);
+
+				if (attrs.Length > 0)
+				{
+					SerializableObjectAttribute attr = attrs[0] as SerializableObjectAttribute;
+					name = attr.Name;
+				}
+			}
+
+			return name;
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -87,27 +118,7 @@ namespace ManagedFusion.Serialization
 
 			if (options.CheckForObjectName || !(value is IDictionary<string, object>))
 			{
-				string name = obj is ICollection ? "collection" : "object";
-
-				// make sure the object isn't an easily handled primity type with IEnumerable
-				if (Type.GetTypeCode(obj.GetType()) != TypeCode.Object)
-					name = "object";
-
-				// make sure this type of dictionary is treated as an object
-				if (obj is IDictionary<string, object>)
-					name = "object";
-
-				// get what the object likes to be called
-				if (obj.GetType().IsDefined(typeof(SerializableObjectAttribute), true))
-				{
-					object[] attrs = obj.GetType().GetCustomAttributes(typeof(SerializableObjectAttribute), true);
-
-					if (attrs.Length > 0)
-					{
-						SerializableObjectAttribute attr = attrs[0] as SerializableObjectAttribute;
-						name = attr.Name;
-					}
-				}
+				string name = GetSerializedObjectName(obj);
 
 				IDictionary<string, object> response = new Dictionary<string, object>(1);
 				response.Add(name, value);
