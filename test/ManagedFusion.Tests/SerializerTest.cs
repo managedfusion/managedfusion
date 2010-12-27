@@ -48,5 +48,30 @@ namespace ManagedFusion.Tests
 			// assert
 			Assert.AreEqual(expected, result.Keys.First());
 		}
+
+		[Test]
+		public void Should_Not_Contain_ModelName()
+		{
+			// arrange
+			var expected = "test";
+			var obj = new Dictionary<string, object>() { 
+				{ Serializer.ModelNameKey, expected },
+				{ "name", "value" }
+			};
+
+			var ser = new Serializer();
+			var options = new SerlizerOptions { CheckForObjectName = true };
+			
+			// act
+			var result = ser.FromObject(obj, options);
+
+			// assert
+			var model = result.First();
+			Assert.AreEqual(expected, model.Key);
+			Assert.IsInstanceOf<IDictionary<string, object>>(model.Value);
+
+			var modelValue = model.Value as IDictionary<string,object>;
+			Assert.IsFalse(modelValue.ContainsKey(Serializer.ModelNameKey));
+		}
 	}
 }

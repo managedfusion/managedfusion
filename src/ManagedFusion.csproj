@@ -78,6 +78,7 @@
     <Compile Include="Extensions\Dictionary.cs" />
     <Compile Include="Extensions\Enumerator.cs" />
     <Compile Include="Extensions\IPAddress.cs" />
+    <Compile Include="Extensions\Number.cs" />
     <Compile Include="Extensions\String.cs" />
     <Compile Include="Extensions\SubnetMask.cs" />
     <Compile Include="Extensions\TimeSpan.cs" />

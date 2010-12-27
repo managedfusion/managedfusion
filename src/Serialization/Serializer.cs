@@ -94,7 +94,7 @@ namespace ManagedFusion.Serialization
 				((IDictionary<string, object>)value).Remove(ModelNameKey);
 			}
 
-			if (options.CheckForObjectName || !(value is IDictionary<string, object>))
+			if (options.CheckForObjectName || !(value is IDictionary<string, object>) || !String.IsNullOrWhiteSpace(modelName))
 			{
 				string name = obj is ICollection ? "collection" : "object";
 
@@ -107,7 +107,7 @@ namespace ManagedFusion.Serialization
 					name = "object";
 
 				// check for special case name from dictionary object
-				if (obj is IModelSerializer && !String.IsNullOrWhiteSpace(modelName))
+				if (!String.IsNullOrWhiteSpace(modelName))
 					name = modelName;
 
 				// get what the object likes to be called
