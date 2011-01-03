@@ -92,6 +92,7 @@
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\ISerializerOptions.cs" />
     <Compile Include="Serialization\JsonDeserializer.cs" />
+    <Compile Include="Serialization\JsonObject.cs" />
     <Compile Include="Serialization\JsonSerializer.cs" />
     <Compile Include="Serialization\JsonToken.cs" />
     <Compile Include="Serialization\SerializableCollectionObjectAttribute.cs" />
