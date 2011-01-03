@@ -60,11 +60,23 @@ namespace System
 		/// <returns></returns>
 		public static byte[] ToHash(this string content, string hashName)
 		{
+			return ToHash(content, hashName, Encoding.Default);
+		}
+
+		/// <summary>
+		/// Toes the hash string.
+		/// </summary>
+		/// <param name="content">The content.</param>
+		/// <param name="hashName">Name of the hash.</param>
+		/// <param name="encoding">The encoding of the string.</param>
+		/// <returns></returns>
+		public static byte[] ToHash(this string content, string hashName, Encoding encoding)
+		{
 			if (content == null)
 				throw new ArgumentNullException("content");
 
 			HashAlgorithm algorithm = CreateHashAlgorithm(hashName);
-			byte[] buffer = algorithm.ComputeHash(Encoding.Default.GetBytes(content));
+			byte[] buffer = algorithm.ComputeHash(encoding.GetBytes(content));
 			return buffer;
 		}
 
@@ -86,7 +98,19 @@ namespace System
 		/// <returns></returns>
 		public static string ToHashString(this string content, string hashName)
 		{
-			byte[] buffer = ToHash(content, hashName);
+			return ToHashString(content, hashName, Encoding.Default);
+		}
+
+		/// <summary>
+		/// Toes the hash string.
+		/// </summary>
+		/// <param name="content">The content.</param>
+		/// <param name="hashName">Name of the hash.</param>
+		/// <param name="encoding">The encoding of the string.</param>
+		/// <returns></returns>
+		public static string ToHashString(this string content, string hashName, Encoding encoding)
+		{
+			byte[] buffer = ToHash(content, hashName, encoding);
 			StringBuilder builder = new StringBuilder(buffer.Length * 2);
 
 			foreach (byte b in buffer)
@@ -113,7 +137,19 @@ namespace System
 		/// <returns></returns>
 		public static long ToHashInt64(this string content, string hashName)
 		{
-			byte[] buffer = ToHash(content, hashName);
+			return ToHashInt64(content, hashName, Encoding.Default);
+		}
+
+		/// <summary>
+		/// Toes the hash int64.
+		/// </summary>
+		/// <param name="content">The content.</param>
+		/// <param name="hashName">Name of the hash.</param>
+		/// <param name="encoding">The encoding of the string.</param>
+		/// <returns></returns>
+		public static long ToHashInt64(this string content, string hashName, Encoding encoding)
+		{
+			byte[] buffer = ToHash(content, hashName, encoding);
 			return BitConverter.ToInt64(buffer, 0);
 		}
 
