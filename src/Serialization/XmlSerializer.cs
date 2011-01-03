@@ -70,6 +70,9 @@ namespace ManagedFusion.Serialization
 		{
 			foreach (var entry in serialization)
 			{
+				if (entry.Key == Serializer.ModelNameKey)
+					continue;
+
 				string key = entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker });
 
 				if ((entry.Key as string).StartsWith(Serializer.AttributeMarker.ToString()))

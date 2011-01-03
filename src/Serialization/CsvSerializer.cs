@@ -73,6 +73,9 @@ namespace ManagedFusion.Serialization
 				IList<string> values = new List<string>();
 				foreach (DictionaryEntry entry in line)
 				{
+					if (entry.Key == Serializer.ModelNameKey)
+						continue;
+
 					if (!(entry.Key is string))
 						throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
 
@@ -104,6 +107,9 @@ namespace ManagedFusion.Serialization
 					IList<string> values = new List<string>();
 					foreach (DictionaryEntry entry in line)
 					{
+						if (entry.Key == Serializer.ModelNameKey)
+							continue;
+
 						if (!(entry.Key is string))
 							throw new ArgumentException("Key of serialization dictionary must be a string.", "serialization");
 

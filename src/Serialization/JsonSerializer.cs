@@ -135,6 +135,9 @@ namespace ManagedFusion.Serialization
 
 			foreach (var entry in serialization)
 			{
+				if (entry.Key == Serializer.ModelNameKey)
+					continue;
+
 				builder.Append(BeginString);
 				builder.Append(entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }));
 				builder.Append(EndString);
