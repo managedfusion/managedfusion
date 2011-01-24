@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.IO;
 
 namespace System
 {
@@ -11,6 +12,7 @@ namespace System
 	public static class StringExtensions
 	{
 		private static readonly Regex UrlReplacementExpression = new Regex(@"[^0-9a-z \-]*", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+		private const string InitVector = "ManagedFusion IV";
 
 		/// <summary>
 		/// Tries the trim.
@@ -25,22 +27,115 @@ namespace System
 			return s.Trim();
 		}
 
-		public static string Encrypt(this string content)
+		public static string Encrypt(this string content, string key)
 		{
-			var rsa = new RSACryptoServiceProvider();
-			byte[] data = Encoding.Default.GetBytes(content);
-			byte[] encrypted = rsa.Encrypt(data, true);
+			byte[] initVectorBytes = Encoding.UTF8.GetBytes(InitVector);
+			byte[] keyBytesLong;
+			using (var sha = new SHA1CryptoServiceProvider())
+				keyBytesLong = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
 
-			return Convert.ToBase64String(encrypted);
+			byte[] keyBytes = new byte[16];
+			Array.Copy(keyBytesLong, keyBytes, 16);
+
+			byte[] textBytes = Encoding.UTF8.GetBytes(content);
+			for (int i = 0; i < 16; i++)
+				textBytes[i] ^= initVectorBytes[i];
+
+			// encrypt the string to an array of bytes
+			byte[] encrypted = Encrypt(textBytes, keyBytes, initVectorBytes);
+			string encoded = Convert.ToBase64String(encrypted);
+			return encoded;
 		}
 
-		public static string Decrypt(this string content)
+		private static byte[] Encrypt(byte[] textBytes, byte[] key, byte[] iv)
 		{
-			var rsa = new RSACryptoServiceProvider();
-			byte[] data = Convert.FromBase64String(content);
-			byte[] decrypted = rsa.Decrypt(data, true);
+			// Declare the stream used to encrypt to an in memory
+			// array of bytes and the RijndaelManaged object
+			// used to encrypt the data.
+			using (var msEncrypt = new MemoryStream())
+			using (var aesAlg = new RijndaelManaged())
+			{
+				// Provide the RijndaelManaged object with the specified key and IV.
+				aesAlg.Mode = CipherMode.CBC;
+				aesAlg.Padding = PaddingMode.PKCS7;
+				aesAlg.KeySize = 128;
+				aesAlg.BlockSize = 128;
+				aesAlg.Key = key;
+				aesAlg.IV = iv;
 
-			return Encoding.Default.GetString(decrypted);
+				// Create an encrytor to perform the stream transform.
+				var encryptor = aesAlg.CreateEncryptor();
+
+				// Create the streams used for encryption.
+				using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+				{
+					csEncrypt.Write(textBytes, 0, textBytes.Length);
+					csEncrypt.FlushFinalBlock();
+				}
+
+				byte[] encrypted = msEncrypt.ToArray();
+
+				// Return the encrypted bytes from the memory stream.
+				return encrypted;
+			}
+		}
+
+		public static string Decrypt(this string content, string key)
+		{
+			byte[] initVectorBytes = Encoding.UTF8.GetBytes(InitVector);
+			byte[] keyBytesLong;
+			using (var sha = new SHA1CryptoServiceProvider())
+				keyBytesLong = sha.ComputeHash(Encoding.UTF8.GetBytes(key));
+
+			byte[] keyBytes = new byte[16];
+			Array.Copy(keyBytesLong, keyBytes, 16);
+
+			byte[] textBytes = Convert.FromBase64String(content);
+
+			// decrypt the string to an array of bytes
+			byte[] decrypted = Decrypt(textBytes, keyBytes, initVectorBytes);
+
+			for (int i = 0; i < 16; i++)
+				decrypted[i] ^= initVectorBytes[i];
+
+			string decoded = Encoding.UTF8.GetString(decrypted);
+			return decoded;
+		}
+
+		private static byte[] Decrypt(byte[] textBytes, byte[] key, byte[] iv)
+		{
+			// Declare the stream used to encrypt to an in memory
+			// array of bytes and the RijndaelManaged object
+			// used to encrypt the data.
+			using (var msDecrypt = new MemoryStream())
+			using (var aesAlg = new RijndaelManaged())
+			{
+				// Provide the RijndaelManaged object with the specified key and IV.
+				aesAlg.Mode = CipherMode.CBC;
+				aesAlg.Padding = PaddingMode.PKCS7;
+				aesAlg.KeySize = 128;
+				aesAlg.BlockSize = 128;
+				aesAlg.Key = key;
+				aesAlg.IV = iv;
+
+				// Create an decrypter to perform the stream transform.
+				var decryptor = aesAlg.CreateDecryptor();
+
+				// Create the streams used for encryption.
+				int count;
+				var buffer = new byte[16 * 1024];
+				using (var msEncrypt = new MemoryStream(textBytes))
+				using (var csDecrypt = new CryptoStream(msEncrypt, decryptor, CryptoStreamMode.Read))
+				{
+					while ((count = csDecrypt.Read(buffer, 0, buffer.Length)) > 0)
+						msDecrypt.Write(buffer, 0, count);
+				}
+
+				byte[] decrypted = msDecrypt.ToArray();
+
+				// Return the decrypted bytes from the memory stream.
+				return decrypted;
+			}
 		}
 
 		/// <summary>
