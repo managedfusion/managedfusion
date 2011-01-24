@@ -25,6 +25,24 @@ namespace System
 			return s.Trim();
 		}
 
+		public static string Encrypt(this string content)
+		{
+			var rsa = new RSACryptoServiceProvider();
+			byte[] data = Encoding.Default.GetBytes(content);
+			byte[] encrypted = rsa.Encrypt(data, true);
+
+			return Convert.ToBase64String(encrypted);
+		}
+
+		public static string Decrypt(this string content)
+		{
+			var rsa = new RSACryptoServiceProvider();
+			byte[] data = Convert.FromBase64String(content);
+			byte[] decrypted = rsa.Decrypt(data, true);
+
+			return Encoding.Default.GetString(decrypted);
+		}
+
 		/// <summary>
 		/// Creates the hash algorithm.
 		/// </summary>
