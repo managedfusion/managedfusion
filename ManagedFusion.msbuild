@@ -14,9 +14,9 @@
 		<AssemblyName>ManagedFusion</AssemblyName>
 		<AssemblyInfo>src\Properties\AssemblyInfo.cs</AssemblyInfo>
 		<PackagePath>nuget</PackagePath>
-		<PackageSpec>$(PackagePath)\ManagedFusion.nuspec</PackageSpec>
+		<PackageSpec>$(PackagePath)\$(AssemblyName).nuspec</PackageSpec>
 		<PackageBuildPath>build</PackageBuildPath>
-		<PackageId>ManagedFusion</PackageId>
+		<PackageId>$(AssemblyName)</PackageId>
 		<NuGetExe>lib\nuget.exe</NuGetExe>
 		<NuPackage>$(PackageBuildPath)\$(PackageId).$(build_number).nupkg</NuPackage>
 	</PropertyGroup>
