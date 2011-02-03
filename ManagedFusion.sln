@@ -5,6 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion", "src\Manage
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion.Tests", "test\ManagedFusion.Tests\ManagedFusion.Tests.csproj", "{98E1CD9D-9812-4CC6-A589-F948DF7161B5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FE26EF0-B50D-41B0-97FC-E4FAE476D321}"
+	ProjectSection(SolutionItems) = preProject
+		ManagedFusion.msbuild = ManagedFusion.msbuild
+		nuget\ManagedFusion.nuspec = nuget\ManagedFusion.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
