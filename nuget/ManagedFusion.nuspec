@@ -2,12 +2,12 @@
 <package>
 	<metadata>
 		<id>ManagedFusion</id>
-		<version>3.5.7</version>
+		<version>1.0.0</version>
 		<title>Managed Fusion</title>
 		<authors>Nick Berardi</authors>
-		<owners>Managed Fusion, LLC</owners>
-		<summary>Managed Fusion contains a bunch of useful extensions and a lightweight serialization framework.</summary>
+		<owners>nberardi</owners>
 		<description>Managed Fusion contains a bunch of useful extensions and a lightweight serialization framework.</description>
+		<summary>Managed Fusion contains a bunch of useful extensions and a lightweight serialization framework.</summary>
 		<language>en-US</language>
 		<projectUrl>https://github.com/managedfusion/managedfusion</projectUrl>
 		<licenseUrl>https://github.com/managedfusion/managedfusion/raw/master/LICENSE.txt</licenseUrl>
