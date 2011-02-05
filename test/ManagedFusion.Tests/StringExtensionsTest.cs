@@ -20,5 +20,17 @@ namespace ManagedFusion.Tests
 
 			Assert.AreEqual(content, decrypted);
 		}
+
+		[Test]
+		public void Encrypt_Short_String()
+		{
+			var key = "TEST1234";
+			var content = "short";
+
+			var encrypted = content.Encrypt(key);
+			var decrypted = encrypted.Decrypt(key);
+
+			Assert.AreEqual(content, decrypted);
+		}
 	}
 }

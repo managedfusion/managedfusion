@@ -38,7 +38,7 @@ namespace System
 			Array.Copy(keyBytesLong, keyBytes, 16);
 
 			byte[] textBytes = Encoding.UTF8.GetBytes(content);
-			for (int i = 0; i < 16; i++)
+			for (int i = 0; i < Math.Min(16, textBytes.Length); i++)
 				textBytes[i] ^= initVectorBytes[i];
 
 			// encrypt the string to an array of bytes
@@ -95,7 +95,7 @@ namespace System
 			// decrypt the string to an array of bytes
 			byte[] decrypted = Decrypt(textBytes, keyBytes, initVectorBytes);
 
-			for (int i = 0; i < 16; i++)
+			for (int i = 0; i < Math.Min(16, decrypted.Length); i++)
 				decrypted[i] ^= initVectorBytes[i];
 
 			string decoded = Encoding.UTF8.GetString(decrypted);
