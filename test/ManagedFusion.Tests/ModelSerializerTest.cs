@@ -14,7 +14,7 @@ namespace ManagedFusion.Tests
 		{
 			#region IModelSerializer Members
 
-			IDictionary<string, object> IModelSerializer.GetSerializedModel()
+			public IDictionary<string, object> GetSerializedModel()
 			{
 				dynamic model = new ExpandoObject();
 
@@ -42,6 +42,49 @@ namespace ManagedFusion.Tests
 
 			// assert
 			Assert.AreEqual(expected, result.Keys.First());
+		}
+
+		[Test]
+		public void Default_JsonObject()
+		{
+			// arrange
+			var json = JsonObject.Parse("{\"name\":\"value\"}");
+
+			// act, assert
+
+			// throw error when no present
+			Assert.Throws<MissingMemberException>(() => {
+				object actual = json.NotPresent;
+			});
+
+			// throw error when case isn't correct
+			Assert.Throws<MissingMemberException>(() => {
+				object actual = json.Name;
+			});
+
+			Assert.AreEqual("value", json.name);
+		}
+
+		[Test]
+		public void Member_OrdinalIgnoreCase_Comparison()
+		{
+			// arrange
+			var json = JsonObject.Parse("{\"name\":\"value\"}", methodComparisonType: StringComparison.OrdinalIgnoreCase);
+
+			// act, assert
+			Assert.AreEqual("value", json.Name);
+		}
+
+		[Test]
+		public void Member_Missing_Doesnt_Throw_Error()
+		{
+			// arrange
+			var json = JsonObject.Parse("{\"name\":\"value\"}", throwErrorOnMissingMethod: false);
+
+			// act, assert
+			Assert.DoesNotThrow(() => {
+				object actual = json.NotPresent;
+			});
 		}
 	}
 }

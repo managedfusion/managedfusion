@@ -2,23 +2,69 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Collections;
+using System.Reflection;
 
 namespace ManagedFusion.Serialization
 {
-	public class JsonObject : DynamicObject
+	public class JsonObject : DynamicObject, IModelSerializer
 	{
 		private IDictionary<string, object> _model;
 		private bool _throwErrorOnMissingMethod;
 
-		internal JsonObject(IDictionary<string, object> model, bool throwErrorOnMissingMethod = true)
+		#region Static Methods
+
+		public static dynamic Parse(string json, bool throwErrorOnMissingMethod = true, StringComparison methodComparisonType = StringComparison.Ordinal)
 		{
-			_model = new Dictionary<string, object>(model, StringComparer.OrdinalIgnoreCase);
+			return new JsonObject(json, throwErrorOnMissingMethod, methodComparisonType);
+		}
+
+		public static dynamic Parse(object obj, bool throwErrorOnMissingMethod = true, StringComparison methodComparisonType = StringComparison.Ordinal)
+		{
+			return new JsonObject(obj, throwErrorOnMissingMethod, methodComparisonType);
+		}
+
+		#endregion
+
+		internal JsonObject(string json, bool throwErrorOnMissingMethod = true, StringComparison methodComparisonType = StringComparison.Ordinal)
+			: this(json.FromJson(), throwErrorOnMissingMethod, methodComparisonType) { }
+
+		internal JsonObject(object obj, bool throwErrorOnMissingMethod = true, StringComparison methodComparisonType = StringComparison.Ordinal)
+			: this(obj.ToDictionary(), throwErrorOnMissingMethod, methodComparisonType) { }
+
+		internal JsonObject(IDictionary<string, object> model, bool throwErrorOnMissingMethod = true, StringComparison methodComparisonType = StringComparison.Ordinal)
+		{
+			_model = new Dictionary<string, object>(model, GetStringComparer(methodComparisonType));
 			_throwErrorOnMissingMethod = throwErrorOnMissingMethod;
 		}
 
-		public IDictionary<string, object> Model { get { return _model; } }
+		private StringComparer GetStringComparer(StringComparison comparisonType)
+		{
+			switch (comparisonType)
+			{
+				case StringComparison.CurrentCulture:
+					return StringComparer.CurrentCulture;
 
-		private static string GetKey(object[] indexes)
+				case StringComparison.CurrentCultureIgnoreCase:
+					return StringComparer.CurrentCultureIgnoreCase;
+
+				case StringComparison.InvariantCulture:
+					return StringComparer.InvariantCulture;
+
+				case StringComparison.InvariantCultureIgnoreCase:
+					return StringComparer.InvariantCultureIgnoreCase;
+
+				case StringComparison.Ordinal:
+					return StringComparer.Ordinal;
+
+				case StringComparison.OrdinalIgnoreCase:
+					return StringComparer.OrdinalIgnoreCase;
+
+				default:
+					throw new ArgumentException(comparisonType + " is not a support method comparison type.", "methodComparisonType");
+			}
+		}
+
+		private static string GetSingleIndexOrNull(object[] indexes)
 		{
 			if (indexes.Length == 1)
 				return (string)indexes[0];
@@ -72,7 +118,7 @@ namespace ManagedFusion.Serialization
 
 		public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
 		{
-			var key = GetKey(indexes);
+			var key = GetSingleIndexOrNull(indexes);
 
 			if (!TryGetValue(key, out result) && _throwErrorOnMissingMethod)
 				throw new MissingMemberException(String.Format(@"Member ""{0}"" was not found in the body of the JSON posted.", key));
@@ -92,9 +138,17 @@ namespace ManagedFusion.Serialization
 			return true;
 		}
 
+		public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+		{
+			result = _model.GetType().InvokeMember(binder.Name, BindingFlags.InvokeMethod, null, _model, args);
+			result = WrapObjectIfNessisary(result);
+
+			return true;
+		}
+
 		public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object value)
 		{
-			var key = GetKey(indexes);
+			var key = GetSingleIndexOrNull(indexes);
 
 			if (!String.IsNullOrEmpty(key))
 				_model[key] = WrapObjectIfNessisary(value);
@@ -107,5 +161,19 @@ namespace ManagedFusion.Serialization
 			_model[binder.Name] = WrapObjectIfNessisary(value);
 			return true;
 		}
+
+		public override string ToString()
+		{
+			return _model.ToJson();
+		}
+
+		#region IModelSerializer Members
+
+		IDictionary<string, object> IModelSerializer.GetSerializedModel()
+		{
+			return _model;
+		}
+
+		#endregion
 	}
 }
