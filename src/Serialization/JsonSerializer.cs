@@ -193,10 +193,6 @@ namespace ManagedFusion.Serialization
 			{
 				BuildString(builder, value as string);
 			}
-			else if (value is Enum)
-			{
-				BuildString(builder, Convert.ToString(value));
-			}
 			else if (value is DateTime || value is DateTimeOffset)
 			{
 				DateTime dt = (value is DateTimeOffset) ? ((DateTimeOffset)value).UtcDateTime : ((DateTime)value);
@@ -214,10 +210,18 @@ namespace ManagedFusion.Serialization
 			{
 				builder.AppendFormat("{0:r}", value);
 			}
+			else if (value is byte[])
+			{
+				BuildString(builder, Convert.ToBase64String(value as byte[]));
+			}
 			else if (value is IEnumerable)
 			{
 				BuildArray(builder, value as IEnumerable);
 			}
+			// else if (value is Char)
+			// else if (value is Enum)
+			// else if (value is Guid)
+			// else if (value is TimeSpan)
 			else
 			{
 				BuildString(builder, Convert.ToString(value));

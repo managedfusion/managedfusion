@@ -118,16 +118,16 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="builder">The builder.</param>
 		/// <param name="array">The array.</param>
-		private void BuildArray(XmlNode node, IList array)
+		private void BuildArray(XmlNode node, IEnumerable array)
 		{
-			for (int i = 0; i < array.Count; i++)
+			foreach (var obj in array)
 			{
-				if (AllowArrayPassThrough(array[i]))
-					BuildValue(node, array[i]);
+				if (AllowArrayPassThrough(obj))
+					BuildValue(node, obj);
 				else
 				{
 					XmlElement subNode = doc.CreateElement("item");
-					BuildValue(subNode, array[i]);
+					BuildValue(subNode, obj);
 					node.AppendChild(subNode);
 				}
 			}
@@ -143,10 +143,6 @@ namespace ManagedFusion.Serialization
 			if (value == null)
 			{
 				node.AppendChild(doc.CreateTextNode(value as string));
-			}
-			else if (value is IList)
-			{
-				BuildArray(node, value as IList);
 			}
 			else if (value is IDictionary<string, object>)
 			{
@@ -169,6 +165,11 @@ namespace ManagedFusion.Serialization
 			else if (value is uint) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((uint)value))); }
 			else if (value is ulong) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ulong)value))); }
 			else if (value is ushort) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ushort)value))); }
+			else if (value is byte[]) { node.AppendChild(doc.CreateTextNode(Convert.ToBase64String(value as byte[]))); }
+			else if (value is IEnumerable)
+			{
+				BuildArray(node, value as IEnumerable);
+			}
 			else
 			{
 				node.AppendChild(doc.CreateTextNode(Convert.ToString(value)));
