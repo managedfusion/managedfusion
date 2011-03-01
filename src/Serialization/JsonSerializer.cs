@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace ManagedFusion.Serialization
 {
@@ -10,77 +12,32 @@ namespace ManagedFusion.Serialization
 	/// </summary>
 	/// <seealso href="http://www.ietf.org/rfc/rfc4627.txt"/>
 	/// <seealso href="http://www.json.org"/>
+	/// <seelaos href="http://tools.ietf.org/html/draft-zyp-json-schema-02"/>
+	/// <seealso href="http://json-schema.org/"/>
 	public class JsonSerializer : ISerializer
 	{
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char BeginObject = '{';
+		private const char BeginObject = '{';
+		private const char EndObject = '}';
+		private const char BeginArray = '[';
+		private const char EndArray = ']';
+		private const char ValueSeperator = ',';
+		private const char NameSeperator = ':';
+		private const char BeginString = '\"';
+		private const char EndString = '\"';
+		private const string BeginDate = "";
+		private const string EndDate = "";
+		private const string TrueValue = "true";
+		private const string FalseValue = "false";
+		private const string NullValue = "null";
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char EndObject = '}';
+		private static readonly DateTime UnixTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char BeginArray = '[';
+		static JsonSerializer()
+		{
+			DateTimeFormat = JsonDateTimeFormat.DateTime;
+		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char EndArray = ']';
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char ValueSeperator = ',';
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char NameSeperator = ':';
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char BeginString = '\"';
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const char EndString = '\"';
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const string BeginDate = "";
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const string EndDate = "";
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const string TrueValue = "true";
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const string FalseValue = "false";
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public const string NullValue = "null";
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public static readonly DateTime UnixTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		public static JsonDateTimeFormat DateTimeFormat { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="JsonSerializer"/> class.
@@ -113,77 +70,89 @@ namespace ManagedFusion.Serialization
 		}
 
 		/// <summary>
-		/// Serializes to json.
+		/// Serializes to JSON
 		/// </summary>
-		/// <param name="serialization">The serialization.</param>
-		/// <returns></returns>
+		/// <param name="serialization">The object to serialize.</param>
 		public virtual string Serialize(IDictionary<string, object> serialization)
 		{
 			StringBuilder builder = new StringBuilder();
-			BuildObject(builder, serialization);
+			Serialize(serialization, new StringWriter(builder));
 			return builder.ToString();
 		}
 
 		/// <summary>
-		/// Serializes to json.
+		/// Serializes to JSON using stream.
 		/// </summary>
-		/// <param name="serialization">The serialization.</param>
-		/// <returns></returns>
-		private void BuildObject(StringBuilder builder, IDictionary<string, object> serialization)
+		/// <param name="serialization">The object to serialize.</param>
+		public virtual void Serialize(IDictionary<string, object> serialization, TextWriter writer)
 		{
-			builder.Append(BeginObject);
+			BuildObject(writer, serialization);
+		}
 
+		/// <summary>
+		/// Builds the name/value pair.
+		/// </summary>
+		public void BuildPair(TextWriter builder, string name, object value)
+		{
+			BuildString(builder, name);
+			builder.Write(NameSeperator);
+			BuildValue(builder, value);
+		}
+
+		/// <summary>
+		/// Builds the JSON object.
+		/// </summary>
+		private void BuildObject(TextWriter builder, IDictionary<string, object> serialization)
+		{
+			builder.Write(BeginObject);
+
+			int count = 0;
+			var finalCount = serialization.Count;
 			foreach (var entry in serialization)
 			{
 				if (entry.Key == Serializer.ModelNameKey)
 					continue;
 
-				builder.Append(BeginString);
-				builder.Append(entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }));
-				builder.Append(EndString);
-				builder.Append(NameSeperator);
-				BuildValue(builder, entry.Value);
-				builder.Append(ValueSeperator);
+				BuildPair(builder,
+					entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }),
+					entry.Value
+				);
+
+				if (count++ < finalCount)
+					builder.Write(ValueSeperator);
 			}
 
-			if (builder[builder.Length - 1] == ValueSeperator)
-				builder.Remove(builder.Length - 1, 1);
-
-			builder.Append(EndObject);
+			builder.Write(EndObject);
 		}
 
 		/// <summary>
-		/// Builds the array.
+		/// Builds the JSON array.
 		/// </summary>
-		/// <param name="builder">The builder.</param>
-		/// <param name="array">The array.</param>
-		private void BuildArray(StringBuilder builder, IEnumerable array)
+		private void BuildArray(TextWriter builder, IEnumerable array)
 		{
-			builder.Append(BeginArray);
+			builder.Write(BeginArray);
 
+			int count = 0;
+			var finalCount = array.Cast<object>().Count();
 			foreach (var obj in array)
 			{
 				BuildValue(builder, obj);
-				builder.Append(ValueSeperator);
+
+				if (count++ < finalCount)
+					builder.Write(ValueSeperator);
 			}
 
-			// if the array is not empty then remove the last ValueSeperator
-			if (builder[builder.Length - 1] == ValueSeperator)
-				builder.Length--;
-
-			builder.Append(EndArray);
+			builder.Write(EndArray);
 		}
 
 		/// <summary>
-		/// Converts to json value.
+		/// Builds the JSON value.
 		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <returns></returns>
-		private void BuildValue(StringBuilder builder, object value)
+		private void BuildValue(TextWriter builder, object value)
 		{
 			if (value == null)
 			{
-				builder.Append(NullValue);
+				builder.Write(NullValue);
 			}
 			else if (value is IDictionary<string,object>)
 			{
@@ -196,19 +165,19 @@ namespace ManagedFusion.Serialization
 			else if (value is DateTime || value is DateTimeOffset)
 			{
 				DateTime dt = (value is DateTimeOffset) ? ((DateTimeOffset)value).UtcDateTime : ((DateTime)value);
-				builder.Append(Math.Floor((dt.ToUniversalTime() - UnixTime).TotalMilliseconds));
+				BuildDate(builder, dt);
 			}
 			else if (value is Boolean)
 			{
-				builder.Append(((bool)value) ? TrueValue : FalseValue);
+				builder.Write(((bool)value) ? TrueValue : FalseValue);
 			}
 			else if (value is Int16 || value is Int32 || value is Int64 || value is Decimal || value is Byte || value is SByte || value is UInt16 || value is UInt32 || value is UInt64)
 			{
-				builder.Append(value);
+				builder.Write(value);
 			}
 			else if (value is Double || value is Single)
 			{
-				builder.AppendFormat("{0:r}", value);
+				builder.Write("{0:R}", value);
 			}
 			else if (value is byte[])
 			{
@@ -229,37 +198,66 @@ namespace ManagedFusion.Serialization
 		}
 
 		/// <summary>
+		/// Builds the JSON DateTime.
+		/// </summary>
+		private void BuildDate(TextWriter builder, DateTime datetime)
+		{
+			datetime = datetime.ToUniversalTime();
+
+			switch (DateTimeFormat)
+			{
+				case JsonDateTimeFormat.Unix:
+					builder.Write(Math.Floor((datetime - UnixTime).TotalMilliseconds));
+					break;
+
+				case JsonDateTimeFormat.RFC1123:
+					BuildString(builder, datetime.ToString("R"));
+					break;
+
+				case JsonDateTimeFormat.ISO8601:
+					BuildString(builder, datetime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"));
+					break;
+
+				case JsonDateTimeFormat.Date:
+					BuildString(builder, datetime.ToString("yyyy'-'MM'-'dd'"));
+					break;
+
+				case JsonDateTimeFormat.Time:
+					BuildString(builder, datetime.ToString("'HH':'mm':'ss"));
+					break;
+			}
+		}
+
+		/// <summary>
 		/// Escapes the string.
 		/// </summary>
-		/// <param name="builder">The builder.</param>
-		/// <param name="s">The s.</param>
-		private void BuildString(StringBuilder builder, string s)
+		private void BuildString(TextWriter builder, string s)
 		{
-			builder.Append(BeginString);
+			builder.Write(BeginString);
 
 			for (int i = 0; i < s.Length; i++)
 			{
 				switch (s[i])
 				{
-					case  '"': builder.Append(@"\"""); break;
-					case '\\': builder.Append(@"\\"); break;
-					case  '/': builder.Append(@"\/"); break;
-					case '\b': builder.Append(@"\b"); break;
-					case '\f': builder.Append(@"\f"); break;
-					case '\n': builder.Append(@"\n"); break;
-					case '\r': builder.Append(@"\r"); break;
-					case '\t': builder.Append(@"\t"); break;
+					case  '"': builder.Write(@"\"""); break;
+					case '\\': builder.Write(@"\\"); break;
+					case  '/': builder.Write(@"\/"); break;
+					case '\b': builder.Write(@"\b"); break;
+					case '\f': builder.Write(@"\f"); break;
+					case '\n': builder.Write(@"\n"); break;
+					case '\r': builder.Write(@"\r"); break;
+					case '\t': builder.Write(@"\t"); break;
 					default:
 						// chedk for a instance character and escape as unicode
 						if (Char.IsControl(s, i))
-							builder.Append(@"\u" + ((int)s[i]).ToString("X4"));
+							builder.Write(@"\u" + ((int)s[i]).ToString("X4"));
 						else
-							builder.Append(s[i]);
+							builder.Write(s[i]);
 						break;
 				}
 			}
 
-			builder.Append(EndString);
+			builder.Write(EndString);
 		}
 	}
 }

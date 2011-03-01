@@ -91,6 +91,7 @@
     <Compile Include="Serialization\IModelSerializer.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\ISerializerOptions.cs" />
+    <Compile Include="Serialization\JsonDateTimeFormat.cs" />
     <Compile Include="Serialization\JsonDeserializer.cs" />
     <Compile Include="Serialization\JsonObject.cs" />
     <Compile Include="Serialization\JsonSerializer.cs" />
