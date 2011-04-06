@@ -148,6 +148,7 @@ namespace ManagedFusion.Serialization
 			{
 				BuildObject(node, value as IDictionary<string, object>);
 			}
+			else if (value is string) { node.AppendChild(doc.CreateTextNode((string)value)); }
 			else if (value is bool) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((bool)value))); }
 			else if (value is byte) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((byte)value))); }
 			else if (value is char) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((char)value))); }
@@ -165,7 +166,7 @@ namespace ManagedFusion.Serialization
 			else if (value is uint) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((uint)value))); }
 			else if (value is ulong) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ulong)value))); }
 			else if (value is ushort) { node.AppendChild(doc.CreateTextNode(XmlConvert.ToString((ushort)value))); }
-			else if (value is byte[]) { node.AppendChild(doc.CreateTextNode(Convert.ToBase64String(value as byte[]))); }
+			else if (value is byte[]) { node.AppendChild(doc.CreateTextNode(Convert.ToBase64String((byte[])value))); }
 			else if (value is IEnumerable)
 			{
 				BuildArray(node, value as IEnumerable);

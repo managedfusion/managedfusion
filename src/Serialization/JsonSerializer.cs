@@ -118,7 +118,7 @@ namespace ManagedFusion.Serialization
 					entry.Value
 				);
 
-				if (count++ < finalCount)
+				if (++count < finalCount)
 					builder.Write(ValueSeperator);
 			}
 
@@ -138,7 +138,7 @@ namespace ManagedFusion.Serialization
 			{
 				BuildValue(builder, obj);
 
-				if (count++ < finalCount)
+				if (++count < finalCount)
 					builder.Write(ValueSeperator);
 			}
 
