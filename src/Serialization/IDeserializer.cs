@@ -12,6 +12,6 @@ namespace ManagedFusion.Serialization
 		/// </summary>
 		/// <param name="input"></param>
 		/// <returns></returns>
-		IDictionary<string, object> Deserialize(string input);
+		object Deserialize(string input);
 	}
 }

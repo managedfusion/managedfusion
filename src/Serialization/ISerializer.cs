@@ -11,10 +11,17 @@ namespace ManagedFusion.Serialization
 	public interface ISerializer : ISerializerOptions
 	{
 		/// <summary>
-		/// Serializes the specified serialization.
+		/// Serializes the specified object.
 		/// </summary>
 		/// <param name="serialization">The serialization.</param>
 		/// <returns></returns>
 		string Serialize(IDictionary<string, object> serialization);
+
+		/// <summary>
+		/// Serializes the specified collection.
+		/// </summary>
+		/// <param name="serialization">The serialization.</param>
+		/// <returns></returns>
+		string Serialize(ICollection<object> serialization);
 	}
 }

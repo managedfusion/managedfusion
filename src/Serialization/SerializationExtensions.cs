@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Web;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace ManagedFusion.Serialization
 {
@@ -39,18 +40,6 @@ namespace ManagedFusion.Serialization
 				FollowFrameworkIgnoreAttributes = useFrameworkIgnores
 			};
 			return ser.Serialize(obj, serializer);
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="input"></param>
-		/// <param name="deserializer"></param>
-		/// <returns></returns>
-		public static T Deserialize<T>(string input, IDeserializer deserializer)
-		{
-			Serializer ser = new Serializer();
-			return ser.Deserialize<T>(input, deserializer);
 		}
 
 		/// <summary>
@@ -103,7 +92,16 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public static IDictionary<string, object> FromJson(this string json)
 		{
-			return Deserialize<IDictionary<string, object>>(json, new JsonDeserializer());
+			var ser = new Serializer();
+			var deserializer = new JsonDeserializer();
+			var obj = ser.Deserialize(json, deserializer);
+
+			if (obj is IDictionary<string, object>)
+				return (IDictionary<string, object>)obj;
+			else if (obj is ICollection)
+				return new Dictionary<string, object> { { "collection", obj } };
+			else
+				return new Dictionary<string, object> { { "object", obj } };
 		}
 
 		/// <summary>

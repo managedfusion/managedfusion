@@ -54,6 +54,11 @@ namespace ManagedFusion.Serialization
 			return builder.ToString();
 		}
 
+		public string Serialize(ICollection<object> serialization)
+		{
+			throw new NotSupportedException("CSV serialization of collections are not supported.");
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>

@@ -81,12 +81,32 @@ namespace ManagedFusion.Serialization
 		}
 
 		/// <summary>
+		/// Serializes to JSON
+		/// </summary>
+		/// <param name="serialization">The object to serialize.</param>
+		public virtual string Serialize(ICollection<object> serialization)
+		{
+			StringBuilder builder = new StringBuilder();
+			Serialize(serialization, new StringWriter(builder));
+			return builder.ToString();
+		}
+
+		/// <summary>
 		/// Serializes to JSON using stream.
 		/// </summary>
 		/// <param name="serialization">The object to serialize.</param>
 		public virtual void Serialize(IDictionary<string, object> serialization, TextWriter writer)
 		{
 			BuildObject(writer, serialization);
+		}
+
+		/// <summary>
+		/// Serializes to JSON using stream.
+		/// </summary>
+		/// <param name="serialization">The object to serialize.</param>
+		public virtual void Serialize(ICollection<object> serialization, TextWriter writer)
+		{
+			BuildArray(writer, serialization);
 		}
 
 		/// <summary>

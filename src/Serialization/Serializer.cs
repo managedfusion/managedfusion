@@ -60,7 +60,30 @@ namespace ManagedFusion.Serialization
 		/// <returns></returns>
 		public string Serialize(object obj, ISerializer serializer)
 		{
-			return serializer.Serialize(FromObject(obj, serializer));
+			if (obj is ICollection && !(obj is IDictionary<string, object>))
+				return serializer.Serialize(FromCollection((ICollection)obj, serializer));
+			else
+				return serializer.Serialize(FromObject(obj, serializer));
+		}
+
+		/// <summary>
+		/// Serializes the specified collection.
+		/// </summary>
+		/// <param name="obj">The obj.</param>
+		/// <param name="checkForObjectName">if set to <see langword="true"/> [check for object name].</param>
+		/// <returns></returns>
+		public ICollection<object> FromCollection(ICollection collection, ISerializerOptions options)
+		{
+			var list = new List<object>(collection.Count);
+
+			foreach (var item in collection) {
+				if (item is ICollection && !(item is IDictionary<string, object>))
+					list.Add(FromCollection((ICollection)item, options));
+				else
+					list.Add(FromObject(item, options));
+			}
+
+			return list;
 		}
 
 		/// <summary>
@@ -277,74 +300,10 @@ namespace ManagedFusion.Serialization
 
 		#region Deserialize
 
-		public T Deserialize<T>(string input, IDeserializer deserializer)
+		public object Deserialize(string input, IDeserializer deserializer)
 		{
-			var bag = deserializer.Deserialize(input);
-			return ToObject<T>(bag, deserializer);
-		}
-
-		public T ToObject<T>(IDictionary<string, object> input, IDeserializerOptions options)
-		{
-			if (typeof(T) == typeof(IDictionary<string, object>))
-				return (T)input;
-
-			T instance;
-			var map = PrepareInstance(out instance);
-
-			foreach (var info in map)
-			{
-				var key = info.Name;
-				if (!input.ContainsKey(key))
-				{
-					key = info.Name.Replace("_", "");
-					if (!input.ContainsKey(key))
-					{
-						key = info.Name.Replace("-", "");
-						if (!input.ContainsKey(key))
-						{
-							continue;
-						}
-					}
-				}
-
-				var value = input[key];
-				if (info.PropertyType == typeof(DateTime))
-				{
-					// Dates (Not part of spec, using lossy epoch convention)
-					var seconds = Int32.Parse(
-						value.ToString(), NumberStyles.Number, CultureInfo.InvariantCulture
-						);
-					var time = new DateTime(1970, 1, 1).ToUniversalTime();
-					value = time.AddSeconds(seconds);
-				}
-
-				info.SetValue(instance, value, null);
-			}
-			return instance;
-		}
-
-		internal IEnumerable<PropertyInfo> PrepareInstance<T>(out T instance)
-		{
-			instance = Activator.CreateInstance<T>();
-			var item = typeof(T);
-
-			CacheReflection(item);
-
-			return _cache[item];
-		}
-
-		internal void CacheReflection(Type item)
-		{
-			if (_cache.ContainsKey(item))
-			{
-				return;
-			}
-
-			var properties = item.GetProperties(
-				BindingFlags.Public | BindingFlags.Instance
-				);
-
-			_cache.Add(item, properties);
+			var obj = deserializer.Deserialize(input);
+			return obj;
 		}
 
 		#endregion

@@ -11,10 +11,11 @@ namespace ManagedFusion.Serialization
 	{
 		#region IDeserializer Members
 
-		public IDictionary<string, object> Deserialize(string input)
+		public object Deserialize(string input)
 		{
 			JavaScriptSerializer serializer = new JavaScriptSerializer();
-			return serializer.Deserialize<Dictionary<string, object>>(input);
+			var obj = serializer.DeserializeObject(input);
+			return obj;
 		}
 
 		#endregion

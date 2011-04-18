@@ -61,6 +61,21 @@ namespace ManagedFusion.Serialization
 			return builder.ToString();
 		}
 
+		public virtual string Serialize(ICollection<object> serialization)
+		{
+			doc = new XmlDocument();
+
+			BuildArray(doc, serialization);
+			doc.InsertBefore(doc.CreateXmlDeclaration("1.0", "utf-8", "yes"), doc.DocumentElement);
+
+			StringBuilder builder = new StringBuilder();
+			using (XmlWriter writer = new XmlTextWriter(new StringWriter(builder)))
+			{
+				doc.WriteTo(writer);
+			}
+			return builder.ToString();
+		}
+
 		/// <summary>
 		/// Serializes to json.
 		/// </summary>
@@ -75,7 +90,7 @@ namespace ManagedFusion.Serialization
 
 				string key = entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker });
 
-				if ((entry.Key as string).StartsWith(Serializer.AttributeMarker.ToString()))
+				if (entry.Key.StartsWith(Serializer.AttributeMarker.ToString()))
 				{
 					XmlAttribute attr = doc.CreateAttribute(key);
 					BuildValue(attr, entry.Value);
