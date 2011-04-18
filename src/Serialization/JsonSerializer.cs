@@ -126,13 +126,12 @@ namespace ManagedFusion.Serialization
 		{
 			builder.Write(BeginObject);
 
-			int count = 0;
-			var finalCount = serialization.Count;
-			foreach (var entry in serialization)
-			{
-				if (entry.Key == Serializer.ModelNameKey)
-					continue;
+			var properties = serialization.Where(x => x.Key != Serializer.ModelNameKey);
 
+			int count = 0;
+			var finalCount = properties.Count();
+			foreach (var entry in properties)
+			{
 				BuildPair(builder,
 					entry.Key.TrimStart(new char[] { Serializer.AttributeMarker, Serializer.CollectionItemMarker }),
 					entry.Value
