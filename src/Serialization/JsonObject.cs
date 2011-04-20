@@ -93,8 +93,7 @@ namespace ManagedFusion.Serialization
 				foreach (var item2 in (IEnumerable)result)
 					itemList.Add(WrapObjectIfNessisary(item2));
 
-				if (itemList.Count > 0)
-					result = itemList;
+				result = itemList;
 			}
 
 			return result;
