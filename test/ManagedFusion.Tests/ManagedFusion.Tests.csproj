@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JsonObjectTest.cs" />
     <Compile Include="JsonTest.cs" />
     <Compile Include="ModelSerializerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

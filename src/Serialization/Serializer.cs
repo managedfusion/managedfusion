@@ -243,7 +243,7 @@ namespace ManagedFusion.Serialization
 				return obj;
 
 			if (obj is IModelSerializer)
-				return new Dictionary<string, object>(((IModelSerializer)obj).GetSerializedModel());
+				return SerializeValue(((IModelSerializer)obj).GetSerializedModel(), level, levelLimit);
 
 			if (obj is IDictionary<string, object>)
 			{

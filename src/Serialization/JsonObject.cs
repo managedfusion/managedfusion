@@ -87,10 +87,10 @@ namespace ManagedFusion.Serialization
 			// handle special types in model object
 			if (result is IDictionary<string, object>)
 				result = new JsonObject((IDictionary<string, object>)result);
-			else if (result is ICollection)
+			else if (result is ICollection || result is Array)
 			{
 				var itemList = new List<object>();
-				foreach (var item2 in (ICollection)result)
+				foreach (var item2 in (IEnumerable)result)
 					itemList.Add(WrapObjectIfNessisary(item2));
 
 				if (itemList.Count > 0)
