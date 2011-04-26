@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("ManagedFusion")]
 [assembly: AssemblyDescription("Managed Fusion contains a bunch of useful extensions and a lightweight serialization framework.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Managed Fusion, LLC")]
 [assembly: AssemblyProduct("ManagedFusion")]
-[assembly: AssemblyCopyright("Copyright © Managed Fusion 2011")]
+[assembly: AssemblyCompany("Managed Fusion, LLC")]
+[assembly: AssemblyCopyright("Copyright © Nick Berardi, Managed Fusion, LLC 2011")]
+[assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

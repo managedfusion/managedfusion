@@ -11,9 +11,7 @@
 
 	<PropertyGroup>
 		<AssemblyName>ManagedFusion</AssemblyName>
-		<AssemblyNetVersion>net40</AssemblyNetVersion>
 		<AssemblyInfo>src\Properties\AssemblyInfo.cs</AssemblyInfo>
-		<PackagePath>nuget</PackagePath>
 		<PackageBuildPath>build</PackageBuildPath>
 		<PackageId>$(AssemblyName)</PackageId>
 		<NuGetExe>lib\nuget.exe</NuGetExe>
@@ -61,7 +59,7 @@
 		</ItemGroup>
 
 		<Copy SourceFiles="@(AssembliesToPackage)" DestinationFolder="$(PackageBuildPath)" />
-		
+
 		<Exec Command="$(NuGetExe) update" />
 		<Exec Command="$(NuGetExe) pack -sym src/$(AssemblyName).csproj -o $(PackageBuildPath)" />
 	</Target>
