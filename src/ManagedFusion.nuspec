@@ -2,7 +2,7 @@
 <package>
 	<metadata>
 		<id>ManagedFusion</id>
-		<version>1.0.0</version>
+		<version>$version$</version>
 		<title>Managed Fusion</title>
 		<authors>Nick Berardi</authors>
 		<owners>Managed Fusion, LLC</owners>
