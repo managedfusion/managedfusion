@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Managed Fusion, LLC")]
 [assembly: AssemblyProduct("ManagedFusion")]
-[assembly: AssemblyCopyright("Copyright © Managed Fusion 2010")]
+[assembly: AssemblyCopyright("Copyright © Managed Fusion 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
