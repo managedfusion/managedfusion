@@ -78,7 +78,7 @@ namespace ManagedFusion.Serialization
 				IList<string> values = new List<string>();
 				foreach (DictionaryEntry entry in line)
 				{
-					if (entry.Key == Serializer.ModelNameKey)
+					if ((string)entry.Key == Serializer.ModelNameKey)
 						continue;
 
 					if (!(entry.Key is string))
@@ -112,7 +112,7 @@ namespace ManagedFusion.Serialization
 					IList<string> values = new List<string>();
 					foreach (DictionaryEntry entry in line)
 					{
-						if (entry.Key == Serializer.ModelNameKey)
+						if ((string)entry.Key == Serializer.ModelNameKey)
 							continue;
 
 						if (!(entry.Key is string))

@@ -11,17 +11,8 @@ namespace ManagedFusion.Serialization
 {
 	public class Serializer
 	{
-		/// <summary>
-		/// 
-		/// </summary>
 		public const char AttributeMarker = '*';
-
-		/// <summary>
-		/// 
-		/// </summary>
 		public const char CollectionItemMarker = '+';
-
-		private static readonly IDictionary<Type, PropertyInfo[]> _cache;
 		public const string ModelNameKey = "{{MODEL_NAME}}";
 
 		/// <summary>

@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ManagedFusion")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Managed Fusion contains a bunch of useful extensions and a lightweight serialization framework.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Managed Fusion")]
+[assembly: AssemblyCompany("Managed Fusion, LLC")]
 [assembly: AssemblyProduct("ManagedFusion")]
 [assembly: AssemblyCopyright("Copyright © Managed Fusion 2010")]
 [assembly: AssemblyTrademark("")]
