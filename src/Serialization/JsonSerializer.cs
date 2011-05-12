@@ -30,14 +30,20 @@ namespace ManagedFusion.Serialization
 		private const string FalseValue = "false";
 		private const string NullValue = "null";
 
+		private const char NewLine = '\n';
+		private const char Tab = '\t';
+
 		private static readonly DateTime UnixTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		static JsonSerializer()
 		{
 			DateTimeFormat = JsonDateTimeFormat.DateTime;
+			PrettyPrint = false;
 		}
 
 		public static JsonDateTimeFormat DateTimeFormat { get; set; }
+
+		public static bool PrettyPrint { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="JsonSerializer"/> class.
@@ -97,6 +103,7 @@ namespace ManagedFusion.Serialization
 		/// <param name="serialization">The object to serialize.</param>
 		public virtual void Serialize(IDictionary<string, object> serialization, TextWriter writer)
 		{
+			_indentLevel = 0;
 			BuildObject(writer, serialization);
 		}
 
@@ -106,16 +113,41 @@ namespace ManagedFusion.Serialization
 		/// <param name="serialization">The object to serialize.</param>
 		public virtual void Serialize(ICollection<object> serialization, TextWriter writer)
 		{
+			_indentLevel = 0;
 			BuildArray(writer, serialization);
+		}
+
+		private int _indentLevel;
+		private int Indent
+		{
+			get { return _indentLevel; }
+			set
+			{
+				if (value < 0)
+					value = 0;
+
+				_indentLevel = value;
+			}
+		}
+
+		private void OutputTabs(TextWriter builder)
+		{
+			for (int i = 0; i < _indentLevel; i++)
+				builder.Write(Tab);
 		}
 
 		/// <summary>
 		/// Builds the name/value pair.
 		/// </summary>
-		public void BuildPair(TextWriter builder, string name, object value)
+		private void BuildPair(TextWriter builder, string name, object value)
 		{
+			OutputTabs(builder);
 			BuildString(builder, name);
 			builder.Write(NameSeperator);
+
+			if (PrettyPrint)
+				builder.Write(" ");
+
 			BuildValue(builder, value);
 		}
 
@@ -126,7 +158,13 @@ namespace ManagedFusion.Serialization
 		{
 			builder.Write(BeginObject);
 
+			if (PrettyPrint)
+				builder.Write(NewLine);
+
 			var properties = serialization.Where(x => x.Key != Serializer.ModelNameKey);
+
+			if (PrettyPrint)
+				Indent++;
 
 			int count = 0;
 			var finalCount = properties.Count();
@@ -139,7 +177,16 @@ namespace ManagedFusion.Serialization
 
 				if (++count < finalCount)
 					builder.Write(ValueSeperator);
+
+				if (PrettyPrint)
+					builder.Write(NewLine);
 			}
+
+			if (PrettyPrint)
+				Indent--;
+
+			if (PrettyPrint)
+				OutputTabs(builder);
 
 			builder.Write(EndObject);
 		}
@@ -151,15 +198,31 @@ namespace ManagedFusion.Serialization
 		{
 			builder.Write(BeginArray);
 
+			if (PrettyPrint)
+				builder.Write(NewLine);
+
+			if (PrettyPrint)
+				Indent++;
+
 			int count = 0;
 			var finalCount = array.Cast<object>().Count();
 			foreach (var obj in array)
 			{
+				OutputTabs(builder);
 				BuildValue(builder, obj);
 
 				if (++count < finalCount)
 					builder.Write(ValueSeperator);
+
+				if (PrettyPrint)
+					builder.Write(NewLine);
 			}
+
+			if (PrettyPrint)
+				Indent--;
+
+			if (PrettyPrint)
+				OutputTabs(builder);
 
 			builder.Write(EndArray);
 		}

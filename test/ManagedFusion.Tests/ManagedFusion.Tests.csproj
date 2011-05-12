@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JsonObjectTest.cs" />
+    <Compile Include="JsonPrettyPrintTest.cs" />
     <Compile Include="JsonTest.cs" />
     <Compile Include="ModelSerializerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
