@@ -13,9 +13,11 @@ namespace ManagedFusion.Serialization
 
 		public object Deserialize(string input)
 		{
+			if (String.IsNullOrEmpty(input))
+				return null;
+
 			JavaScriptSerializer serializer = new JavaScriptSerializer();
-			var obj = serializer.DeserializeObject(input);
-			return obj;
+			return serializer.DeserializeObject(input);
 		}
 
 		#endregion

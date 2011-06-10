@@ -1,9 +1,9 @@
 ﻿using System;
-using NUnit.Framework;
-using System.Dynamic;
-using ManagedFusion.Serialization;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using ManagedFusion.Serialization;
+using NUnit.Framework;
 
 namespace ManagedFusion.Tests
 {

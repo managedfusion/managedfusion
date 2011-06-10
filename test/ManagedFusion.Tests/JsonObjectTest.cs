@@ -11,6 +11,19 @@ namespace ManagedFusion.Tests
 	[TestFixture]
 	public class JsonObjectTest
 	{
+		[Test, Ignore]
+		public void Complex()
+		{
+			// arrange
+			var json = Properties.Resources.ComplexJson;
+
+			// act 
+			dynamic obj = JsonObject.Parse(json);
+
+			// assert
+			Assert.IsInstanceOf<ICollection>(obj.d);
+		}
+
 		[Test]
 		public void Json_Array_Should_Be_ICollection()
 		{
